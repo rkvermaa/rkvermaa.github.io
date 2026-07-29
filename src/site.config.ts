@@ -12,10 +12,10 @@ export const siteConfig: SiteConfig = {
 		},
 	},
 	description:
-		"Full-Stack AI Engineer working on GenAI, multi-agent systems and large-scale data platforms. Currently Lead Data Scientist at Passageway.",
-	intro: `I'm Ravi — a Full-Stack AI Engineer working where large language models meet large-scale data.
+		"Full-Stack AI Engineer working on agentic AI — agent harnesses, multi-agent orchestration, LLM tooling and the data platforms underneath.",
+	intro: `Full-Stack AI Engineer working on agentic AI: agent harnesses, multi-agent orchestration, LLM tooling, RAG and the data platforms underneath.
 
-For the past seven years I've built GenAI systems, multi-agent workflows and the data platforms underneath them. Right now I lead smart meter analytics at Passageway, across a fleet of more than 600,000 meters.`,
+Eight years building AI systems that ship — for finance, telecom and energy, from prototype to production.`,
 	lang: "en-US",
 	ogLocale: "en_US",
 	title: "Ravi Kumar Verma",
@@ -32,7 +32,7 @@ For the past seven years I've built GenAI systems, multi-agent workflows and the
 		jobTitle: "Lead Data Scientist",
 		employer: "Passageway",
 		alumni: "IIT Roorkee",
-		avatar: "/avatar.png",
+		avatar: "/avatar.jpg",
 		resume: "/cv.pdf",
 	},
 	contact: {

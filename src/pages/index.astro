@@ -14,6 +14,13 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 const recentRoles = experience.slice(0, 3);
 const featuredProjects = projects.filter((project) => project.featured).slice(0, 3);
 const recentWriting = writing.slice(0, 3);
+
+/** Blank lines in `intro` separate paragraphs — render them as real <p>s so the
+ *  spacing is controlled by CSS rather than a literal empty line. */
+const introParagraphs = (siteConfig.intro ?? siteConfig.description)
+	.split(/\n\s*\n/)
+	.map((para) => para.trim())
+	.filter(Boolean);
 ---
 
 <Schema
@@ -45,7 +52,19 @@ const recentWriting = writing.slice(0, 3);
 
 <PageLayout meta={{ title: "Home", description: siteConfig.description }}>
 	<section class="hero">
-		<p>{siteConfig.intro ?? siteConfig.description}</p>
+		<div class="hero-grid">
+			{profile?.avatar && (
+				<img
+					class="portrait"
+					src={withBase(profile.avatar)}
+					alt={profile.name ?? siteConfig.author}
+					width="640"
+					height="800"
+					decoding="async"
+				/>
+			)}
+			<div class="hero-text">
+		{introParagraphs.map((para) => <p>{para}</p>)}
 		<div class="socials">
 			{profile?.github && (
 				<>
@@ -72,6 +91,11 @@ const recentWriting = writing.slice(0, 3);
 				</>
 			)}
 			<a href={withBase("/contact/")} data-astro-prefetch>Contact</a>
+		</div>
+				<div class="more">
+					<a data-astro-prefetch href={withBase("/about/")}>More about me →</a>
+				</div>
+			</div>
 		</div>
 	</section>
 
@@ -171,14 +195,39 @@ const recentWriting = writing.slice(0, 3);
 	.hero {
 		margin-bottom: 76px;
 	}
-	.hero p {
+	.hero-grid {
+		display: grid;
+		grid-template-columns: 156px minmax(0, 1fr);
+		gap: 36px;
+		align-items: start;
+	}
+	/* 4:5 portrait; the 640×800 source stays crisp past 3× density. */
+	.portrait {
+		width: 156px;
+		height: 195px;
+		/* Drop by the paragraph's half-leading so the image's top edge lines up
+		   with the first line's letters, not its (taller) line box. */
+		margin-top: calc((1.65em - 1em) / 2);
+		font-size: 19.5px;
+		border-radius: 2px;
+		object-fit: cover;
+		background: var(--paper);
+		border: 1px solid var(--hairline);
+		transition: background-color 0.35s ease, border-color 0.35s ease;
+	}
+	.hero-text {
+		min-width: 0;
+	}
+	.hero-text > p {
 		font-size: 19.5px;
 		line-height: 1.65;
 		color: hsl(var(--theme-text));
-		margin: 0 0 22px;
+		margin: 0 0 18px;
 		max-width: 60ch;
 		text-wrap: pretty;
-		white-space: pre-line;
+	}
+	.hero-text > p:last-of-type {
+		margin-bottom: 0;
 	}
 	.socials {
 		font-family: var(--font-sans);
@@ -298,7 +347,17 @@ const recentWriting = writing.slice(0, 3);
 		.hero {
 			margin-bottom: 56px;
 		}
-		.hero p {
+		/* Two columns leave too little room for the text at phone widths. */
+		.hero-grid {
+			grid-template-columns: 1fr;
+			gap: 22px;
+			justify-items: start;
+		}
+		.portrait {
+			width: 120px;
+			height: 150px;
+		}
+		.hero-text > p {
 			font-size: 18px;
 		}
 		.role-meta {
@@ -321,7 +380,7 @@ const recentWriting = writing.slice(0, 3);
 		.hero {
 			margin-bottom: 48px;
 		}
-		.hero p {
+		.hero-text > p {
 			font-size: 17px;
 		}
 		.socials {
