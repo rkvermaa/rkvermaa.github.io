@@ -1,0 +1,107 @@
+---
+import { projects, stackLine } from "@/data/projects";
+import PageLayout from "@/layouts/Base.astro";
+import { absoluteUrl } from "@/utils/path";
+import { Schema } from "astro-seo-schema";
+
+const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
+---
+
+<Schema
+	item={{
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: [
+			{
+				"@type": "ListItem",
+				position: 1,
+				name: "Home",
+				item: siteUrl("/"),
+			},
+			{
+				"@type": "ListItem",
+				position: 2,
+				name: "Projects",
+				item: siteUrl("/projects/"),
+			},
+		],
+	}}
+/>
+
+<PageLayout
+	meta={{
+		title: "Projects",
+		description:
+			"Selected work in GenAI, multi-agent systems, data engineering and machine learning.",
+	}}
+>
+	<section class="work" aria-labelledby="work-label">
+		<div class="section-label" id="work-label">Projects</div>
+		<p class="intro">
+			Work I've led or built across GenAI, data engineering and machine learning. Most of it was
+			delivered inside client engagements, so the code isn't public — the descriptions are what I
+			can share.
+		</p>
+		<ul class="work-list">
+			{
+				projects.map((project) => {
+					const body = (
+						<>
+							<div class="head">
+								<span class="name">{project.name}</span>
+								<span class="stack">{stackLine(project)}</span>
+								{project.badge && <span class="badge">{project.badge}</span>}
+							</div>
+							<p>{project.desc}</p>
+						</>
+					);
+					return (
+						<li>
+							{project.href ? (
+								<a href={project.href} rel="noreferrer" target="_blank">
+									{body}
+								</a>
+							) : (
+								<div class="entry">{body}</div>
+							)}
+						</li>
+					);
+				})
+			}
+		</ul>
+	</section>
+</PageLayout>
+
+<style>
+	.work {
+		margin-bottom: 88px;
+	}
+	.intro {
+		font-family: var(--font-serif);
+		font-size: 17.5px;
+		line-height: 1.7;
+		color: hsl(var(--theme-text));
+		margin: 0 0 36px;
+		max-width: 60ch;
+		text-wrap: pretty;
+	}
+	/* Unlinked entries share the anchor's box but none of its affordances. */
+	.work :global(ul.work-list .entry) {
+		display: block;
+	}
+
+	@media (max-width: 720px) {
+		.intro {
+			font-size: 17px;
+			margin-bottom: 28px;
+		}
+	}
+	@media (max-width: 420px) {
+		.work {
+			margin-bottom: 56px;
+		}
+		.intro {
+			font-size: 16.5px;
+		}
+	}
+</style>

@@ -1,14 +1,21 @@
 ---
 title: About
-description: A short introduction. Replace this in src/content/page/about.md.
+description: Ravi Kumar Verma — Full-Stack AI Engineer building GenAI systems, multi-agent workflows and large-scale data platforms.
 ---
 
-This is the About page. It's a markdown file at `src/content/page/about.md` — edit it freely. The shape is intentionally unstructured so you can write a paragraph, a list, a CV, or whatever fits.
+I'm a Full-Stack AI Engineer who builds scalable data infrastructure and the intelligent systems that sit on top of it. At Passageway I architect enterprise-scale solutions that process terabytes of smart meter data, turning raw readings into something a utility can actually act on.
 
-A few example bullets to get going:
+Most of my work lives at the seam between two things that are usually kept apart: large language models and large-scale data. Designing a lakehouse, training an anomaly detector, wiring up a RAG system with multi-agent workflows — they're the same problem wearing different clothes, which is getting a messy real-world process to behave predictably.
 
-- 👋 One-line intro — what you do, where, since when.
-- 🛠 The tools you reach for first.
-- 📝 What you tend to write about here.
+I started somewhere else entirely. Six years as a Junior Telecom Officer at BSNL, keeping twelve rural telephone exchanges and a district's worth of towers running, taught me more about reliability under constraint than any course since. I moved into data science in 2018 and haven't looked back.
 
-Find me on [GitHub](https://github.com/example), [LinkedIn](https://www.linkedin.com/in/example/), or by [email](mailto:john@example.com).
+Some things I care about:
+
+- Building systems that survive contact with production, not just the demo.
+- Making complicated things feel simple, in code and in explanation.
+- Staying close to the newest tooling without mistaking novelty for progress.
+- Sleeping properly. It's underrated, and I'm told I'm good at it.
+
+Outside the day job I'm a part-time PhD student at IIT Roorkee, which is a slower and more stubborn kind of problem than anything at work.
+
+If you're building something in this space, or you just want to compare notes, [get in touch](/contact/).

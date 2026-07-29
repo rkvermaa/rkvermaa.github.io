@@ -18,7 +18,6 @@ export const siteConfig: SiteConfig = {
 For the past seven years I've built GenAI systems, multi-agent workflows and the data platforms underneath them. Right now I lead smart meter analytics at Passageway, across a fleet of more than 600,000 meters.`,
 	lang: "en-US",
 	ogLocale: "en_US",
-	sortPostsByUpdatedDate: false,
 	title: "Ravi Kumar Verma",
 	hideThemeCredit: false,
 	profile: {
@@ -40,13 +39,6 @@ For the past seven years I've built GenAI systems, multi-agent workflows and the
 		// Publishable client-side key — see ContactConfig in src/types.ts.
 		web3formsKey: "6966093a-93c7-4b63-b7a9-e7b303b92b6d",
 	},
-	// Uncomment & fill in to enable Giscus comments on every post.
-	// comments: {
-	// 	repo: "your-handle/your-repo",
-	// 	repoId: "...",
-	// 	category: "General",
-	// 	categoryId: "...",
-	// },
 	// Uncomment to enable analytics. Both providers load via Partytown.
 	// analytics: {
 	// 	googleAnalyticsId: "G-XXXXXXX",

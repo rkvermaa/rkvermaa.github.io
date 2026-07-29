@@ -1,23 +1,19 @@
 ---
-import PostList from "@/components/blog/PostList.astro";
-import { getAllPosts, getPostSortDate, sortMDByDate } from "@/data/post";
-import { showcase } from "@/data/showcase";
+import { experience } from "@/data/experience";
+import { projects, stackLine } from "@/data/projects";
+import { writing } from "@/data/writing";
 import PageLayout from "@/layouts/Base.astro";
 import { siteConfig } from "@/site-config";
-import { formatRailDate, formatStampDate } from "@/utils/date";
+import { formatDateRange, toDateTimeRange } from "@/utils/date";
 import { absoluteUrl, withBase } from "@/utils/path";
 import { Schema } from "astro-seo-schema";
 
-const allPosts = await getAllPosts();
-const allPostsByDate = sortMDByDate(allPosts);
-const TIMELINE_LIMIT = 5;
-const timelinePosts = allPostsByDate.slice(0, TIMELINE_LIMIT);
-const featured = timelinePosts[0];
-const rest = timelinePosts.slice(1);
-const archiveCount = allPosts.length;
-
 const profile = siteConfig.profile;
 const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
+
+const recentRoles = experience.slice(0, 3);
+const featuredProjects = projects.filter((project) => project.featured).slice(0, 3);
+const recentWriting = writing.slice(0, 3);
 ---
 
 <Schema
@@ -34,14 +30,14 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 			{
 				"@type": "ListItem",
 				position: 2,
-				name: "About",
-				item: siteUrl("/about"),
+				name: "Experience",
+				item: siteUrl("/experience/"),
 			},
 			{
 				"@type": "ListItem",
 				position: 3,
-				name: "Posts",
-				item: siteUrl("/posts"),
+				name: "Projects",
+				item: siteUrl("/projects/"),
 			},
 		],
 	}}
@@ -49,7 +45,7 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 
 <PageLayout meta={{ title: "Home", description: siteConfig.description }}>
 	<section class="hero">
-		<p>{siteConfig.description}</p>
+		<p>{siteConfig.intro ?? siteConfig.description}</p>
 		<div class="socials">
 			{profile?.github && (
 				<>
@@ -69,71 +65,105 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 					<span class="sep">·</span>
 				</>
 			)}
-			<a href={withBase("/rss.xml")}>RSS</a>
+			{profile?.resume && (
+				<>
+					<a href={withBase(profile.resume)}>Résumé</a>
+					<span class="sep">·</span>
+				</>
+			)}
+			<a href={withBase("/contact/")} data-astro-prefetch>Contact</a>
 		</div>
 	</section>
 
-	<section class="writing" aria-labelledby="writing-label">
-		<div class="section-label" id="writing-label">Writing</div>
+	<section class="experience" aria-labelledby="experience-label">
+		<div class="section-label" id="experience-label">Experience</div>
 		<div class="timeline">
 			{
-				featured && (
-					<div class="post featured" style="--i: 0">
+				recentRoles.map((role, idx) => (
+					<div class="post role" style={`--i: ${idx}`}>
 						<div class="post-rail">
-							<time class="post-date" datetime={getPostSortDate(featured).toISOString()}>
-								{formatRailDate(getPostSortDate(featured))}
+							<time class="post-date" datetime={toDateTimeRange(role.start, role.end)}>
+								{formatDateRange(role.start, role.end)}
 							</time>
 							<span class="post-dot" aria-hidden="true" />
 						</div>
 						<div class="post-body">
-							<div class="post-stamp">Latest · {formatStampDate(getPostSortDate(featured))}</div>
 							<h2 class="post-title">
-								<a class="post-cardlink" data-astro-prefetch href={withBase(`/posts/${featured.id}/`)}>
-									{featured.data.title}
-								</a>
+								{role.role} <span class="at">at</span> {role.company}
 							</h2>
-							<p class="post-excerpt">{featured.data.description}</p>
-							{!!featured.data.tags?.length && (
-								<div class="post-meta">
-									{featured.data.tags.map((t, i) => (
-										<Fragment>{i > 0 && <span class="dot">·</span>}<a class="tag" href={withBase(`/tags/${encodeURIComponent(t)}/`)}>{t}</a></Fragment>
-									))}
-								</div>
-							)}
+							<div class="role-meta">{formatDateRange(role.start, role.end)}</div>
+							<p class="post-preview">{role.summary}</p>
 						</div>
 					</div>
-				)
+				))
 			}
-
-			<PostList posts={rest} startIndex={1} headingLevel="h3" />
-
-			<div class="archive-link" style={`--i: ${rest.length + 1}`}>
-				<a data-astro-prefetch href={withBase("/posts/")}
-					>View all {archiveCount} posts →</a
-				>
+			<div class="archive-link" style={`--i: ${recentRoles.length}`}>
+				<a data-astro-prefetch href={withBase("/experience/")}>Full work history →</a>
 			</div>
 		</div>
 	</section>
 
-	{showcase.length > 0 && (
-		<section class="work" aria-labelledby="work-label">
-			<div class="section-label" id="work-label">Showcase</div>
-			<ul class="work-list">
-				{showcase.map((item, idx) => (
-					<li style={`--i: ${idx + 1}`}>
-						<a href={item.href} rel="noreferrer" target="_blank">
-							<div class="head">
-								<span class="name">{item.name}</span>
-								<span class="stack">{item.stack}</span>
-								{item.badge && <span class="badge">{item.badge}</span>}
-							</div>
-							<p>{item.desc}</p>
-						</a>
-					</li>
-				))}
-			</ul>
-		</section>
-	)}
+	{
+		featuredProjects.length > 0 && (
+			<section class="work" aria-labelledby="work-label">
+				<div class="section-label" id="work-label">Selected projects</div>
+				<ul class="work-list">
+					{featuredProjects.map((project, idx) => (
+						<li style={`--i: ${idx + 1}`}>
+							{project.href ? (
+								<a href={project.href} rel="noreferrer" target="_blank">
+									<div class="head">
+										<span class="name">{project.name}</span>
+										<span class="stack">{stackLine(project)}</span>
+										{project.badge && <span class="badge">{project.badge}</span>}
+									</div>
+									<p>{project.desc}</p>
+								</a>
+							) : (
+								<div class="entry">
+									<div class="head">
+										<span class="name">{project.name}</span>
+										<span class="stack">{stackLine(project)}</span>
+										{project.badge && <span class="badge">{project.badge}</span>}
+									</div>
+									<p>{project.desc}</p>
+								</div>
+							)}
+						</li>
+					))}
+				</ul>
+				<p class="more">
+					<a data-astro-prefetch href={withBase("/projects/")}>
+						All {projects.length} projects →
+					</a>
+				</p>
+			</section>
+		)
+	}
+
+	{
+		recentWriting.length > 0 && (
+			<section class="writing" aria-labelledby="writing-label">
+				<div class="section-label" id="writing-label">Writing</div>
+				<ul class="work-list">
+					{recentWriting.map((item, idx) => (
+						<li style={`--i: ${idx + 1}`}>
+							<a href={item.href} rel="noreferrer" target="_blank">
+								<div class="head">
+									<span class="name">{item.title}</span>
+									{item.source && <span class="stack">{item.source} ↗</span>}
+								</div>
+								{item.description && <p>{item.description}</p>}
+							</a>
+						</li>
+					))}
+				</ul>
+				<p class="more">
+					<a data-astro-prefetch href={withBase("/writing/")}>All writing →</a>
+				</p>
+			</section>
+		)
+	}
 </PageLayout>
 
 <style>
@@ -173,94 +203,35 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 		margin: 0 9px;
 	}
 
-	/* ---------- Writing timeline ---------- */
-	.writing {
+	/* ---------- Experience preview ---------- */
+	.experience {
 		margin-bottom: 84px;
 	}
-	/* ---------- Featured post ---------- */
-	.post.featured .post-body {
-		position: relative;
-		padding-bottom: 56px;
-	}
-	/* Title is the post link; its ::after stretches over the whole card body so
-	   clicking anywhere opens the post, while the tag links sit above it. */
-	.post.featured .post-cardlink {
-		color: inherit;
-		text-decoration: none;
-	}
-	.post.featured .post-cardlink::after {
-		content: "";
-		position: absolute;
-		inset: 0;
-		z-index: 1;
-	}
-	.post.featured .post-cardlink:focus-visible {
-		outline: 2px solid hsl(var(--theme-accent));
-		outline-offset: 3px;
-		border-radius: 3px;
-	}
-	.post.featured .post-stamp {
-		font-family: var(--font-mono);
-		font-size: 11px;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		color: hsl(var(--theme-accent));
-		margin-bottom: 12px;
-	}
-	.post.featured .post-title {
-		font-size: 30px;
-		line-height: 1.14;
-		margin-bottom: 14px;
-		letter-spacing: -0.02em;
-	}
-	.post.featured .post-excerpt {
-		font-size: 18px;
-		line-height: 1.62;
-		color: hsl(var(--theme-text-muted));
-		margin: 0 0 14px;
-		max-width: 58ch;
-		word-wrap: break-word;
-		overflow-wrap: anywhere;
-	}
-	.post.featured .post-meta {
-		position: relative;
-		z-index: 2;
-		font-family: var(--font-mono);
-		font-size: 11.5px;
+	.at {
 		color: hsl(var(--theme-text) / 0.55);
-		font-variant-numeric: tabular-nums;
-		font-feature-settings: "tnum";
+		font-weight: 400;
 	}
-	.post.featured .post-meta .tag {
-		color: inherit;
-		text-decoration: none;
-		transition: color 0.2s ease;
+	.role-meta {
+		display: none;
 	}
-	.post.featured .post-meta .tag::before {
-		content: "#";
-		color: var(--faint);
-		transition: color 0.2s ease;
+	/* These rows aren't links, so suppress the timeline's clickable affordances. */
+	.timeline :global(.role:hover .post-title) {
+		color: hsl(var(--theme-text));
 	}
-	.post.featured .post-meta .tag:hover,
-	.post.featured .post-meta .tag:hover::before {
-		color: hsl(var(--theme-accent));
+	.timeline :global(.role:hover .post-dot) {
+		background: hsl(var(--theme-bg));
+		border-color: var(--faint);
+		box-shadow: none;
 	}
-	.post.featured .post-meta .tag:focus-visible {
-		outline: 2px solid hsl(var(--theme-accent));
-		outline-offset: 2px;
-		border-radius: 3px;
+	.timeline :global(.role:hover .post-date) {
+		color: hsl(var(--theme-text) / 0.72);
 	}
-	.post.featured .post-meta .dot {
-		color: var(--faint);
-		margin: 0 8px;
+	.timeline :global(.role:active) {
+		transform: none;
+		opacity: 1;
 	}
-	.post.featured .post-dot {
-		--rail-dot-size: 11px;
-		border-color: hsl(var(--theme-text-muted));
-	}
-	.post.featured:hover .post-dot {
-		background: hsl(var(--theme-accent));
-		border-color: hsl(var(--theme-accent));
+	.timeline :global(.role .post-preview) {
+		-webkit-line-clamp: 2;
 	}
 
 	.archive-link {
@@ -270,7 +241,8 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 		font-size: 13.5px;
 		color: hsl(var(--theme-text) / 0.72);
 	}
-	.archive-link a {
+	.archive-link a,
+	.more a {
 		display: inline-block;
 		padding: 6px 0;
 		color: hsl(var(--theme-text-muted));
@@ -280,17 +252,28 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 		text-underline-offset: 3px;
 		transition: color 0.2s ease, text-decoration-color 0.2s ease;
 	}
-	.archive-link a:hover {
+	.archive-link a:hover,
+	.more a:hover {
 		color: hsl(var(--theme-accent));
 		text-decoration-color: hsl(var(--theme-accent));
 	}
 
-	.work {
+	.work,
+	.writing {
 		margin-bottom: 88px;
+	}
+	.work :global(ul.work-list .entry) {
+		display: block;
+	}
+	.more {
+		margin: 14px 0 0;
+		font-family: var(--font-sans);
+		font-size: 13.5px;
 	}
 
 	.socials a:focus-visible,
-	.archive-link a:focus-visible {
+	.archive-link a:focus-visible,
+	.more a:focus-visible {
 		outline: 2px solid hsl(var(--theme-accent));
 		outline-offset: 3px;
 		border-radius: 3px;
@@ -303,27 +286,16 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 		.hero p {
 			font-size: 18px;
 		}
-		.post.featured .post-rail {
+		.role-meta {
+			display: block;
+			font-family: var(--font-mono);
+			font-size: 11.5px;
+			color: hsl(var(--theme-text) / 0.6);
+			margin-bottom: 8px;
+			font-variant-numeric: tabular-nums;
+		}
+		.timeline :global(.role .post-rail) {
 			display: none;
-		}
-		.post.featured .post-body {
-			padding-bottom: 24px;
-			border-bottom: 1px solid var(--hairline);
-			margin-bottom: 4px;
-		}
-		.post.featured .post-title {
-			font-size: 22px;
-			line-height: 1.2;
-			letter-spacing: -0.015em;
-			margin-bottom: 10px;
-		}
-		.post.featured .post-excerpt {
-			font-size: 15.5px;
-			line-height: 1.55;
-			margin: 0 0 10px;
-		}
-		.post.featured .post-meta {
-			font-size: 11px;
 		}
 		.archive-link {
 			margin-top: 0;
@@ -343,16 +315,11 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 		.socials .sep {
 			margin: 0 6px;
 		}
-		.writing {
+		.experience {
 			margin-bottom: 64px;
 		}
-		.post.featured .post-title {
-			font-size: 17px;
-		}
-		.post.featured .post-excerpt {
-			font-size: 15px;
-		}
-		.work {
+		.work,
+		.writing {
 			margin-bottom: 56px;
 		}
 	}

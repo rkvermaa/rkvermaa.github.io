@@ -1,0 +1,156 @@
+---
+import { writing } from "@/data/writing";
+import PageLayout from "@/layouts/Base.astro";
+import { siteConfig } from "@/site-config";
+import { absoluteUrl } from "@/utils/path";
+import { Schema } from "astro-seo-schema";
+
+const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
+const medium = siteConfig.profile?.medium;
+
+const railFormatter = new Intl.DateTimeFormat("en-US", {
+	day: "numeric",
+	month: "short",
+	year: "numeric",
+});
+
+/** Dates are authored as `YYYY-MM-DD` or `YYYY-MM`; parse them as local. */
+function parseDate(value: string): Date {
+	const [y = "", m = "1", d = "1"] = value.split("-");
+	return new Date(Number(y), Number(m) - 1, Number(d));
+}
+---
+
+<Schema
+	item={{
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: [
+			{
+				"@type": "ListItem",
+				position: 1,
+				name: "Home",
+				item: siteUrl("/"),
+			},
+			{
+				"@type": "ListItem",
+				position: 2,
+				name: "Writing",
+				item: siteUrl("/writing/"),
+			},
+		],
+	}}
+/>
+
+<PageLayout
+	meta={{
+		title: "Writing",
+		description: "Articles and notes on AI engineering, LLMs and data platforms.",
+	}}
+>
+	<section class="writing" aria-labelledby="writing-label">
+		<div class="section-label" id="writing-label">Writing</div>
+		<p class="intro">
+			Occasional notes on AI engineering, LLMs and the data platforms underneath them. Published
+			elsewhere — the links go out.
+		</p>
+
+		{
+			writing.length > 0 ? (
+				<div class="timeline">
+					{writing.map((item, idx) => (
+						<div class="post" style={`--i: ${idx}`}>
+							<div class="post-rail">
+								{item.date && (
+									<time class="post-date" datetime={item.date}>
+										{railFormatter.format(parseDate(item.date))}
+									</time>
+								)}
+								<span class="post-dot" aria-hidden="true" />
+							</div>
+							<div class="post-body">
+								<h2 class="post-title">
+									<a href={item.href} rel="noreferrer" target="_blank">
+										{item.title}
+									</a>
+								</h2>
+								{item.description && <p class="post-preview">{item.description}</p>}
+								{item.source && <div class="source">{item.source} ↗</div>}
+							</div>
+						</div>
+					))}
+				</div>
+			) : (
+				<p class="empty">
+					Nothing published here yet.
+					{medium && (
+						<>
+							{" "}
+							In the meantime, anything I do write lands on{" "}
+							<a href={medium} rel="noreferrer" target="_blank">
+								Medium
+							</a>
+							.
+						</>
+					)}
+				</p>
+			)
+		}
+	</section>
+</PageLayout>
+
+<style>
+	.writing {
+		margin-bottom: 88px;
+	}
+	.intro {
+		font-family: var(--font-serif);
+		font-size: 17.5px;
+		line-height: 1.7;
+		color: hsl(var(--theme-text));
+		margin: 0 0 40px;
+		max-width: 60ch;
+		text-wrap: pretty;
+	}
+	.source {
+		font-family: var(--font-mono);
+		font-size: 11px;
+		color: hsl(var(--theme-text) / 0.6);
+		margin-top: 6px;
+	}
+	.empty {
+		font-size: 16.5px;
+		line-height: 1.7;
+		color: hsl(var(--theme-text-muted));
+		max-width: 58ch;
+		margin: 0;
+	}
+	.empty a,
+	.intro a {
+		color: inherit;
+		text-decoration: underline;
+		text-decoration-color: hsl(var(--theme-text) / 0.35);
+		text-decoration-thickness: 1px;
+		text-underline-offset: 3px;
+	}
+	.empty a:hover,
+	.intro a:hover {
+		color: hsl(var(--theme-accent));
+		text-decoration-color: hsl(var(--theme-accent));
+	}
+
+	@media (max-width: 720px) {
+		.intro {
+			font-size: 17px;
+			margin-bottom: 30px;
+		}
+	}
+	@media (max-width: 420px) {
+		.writing {
+			margin-bottom: 56px;
+		}
+		.intro {
+			font-size: 16.5px;
+		}
+	}
+</style>

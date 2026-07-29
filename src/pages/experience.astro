@@ -1,0 +1,263 @@
+---
+import { experience } from "@/data/experience";
+import PageLayout from "@/layouts/Base.astro";
+import { siteConfig } from "@/site-config";
+import { formatDateRange, toDateTimeRange } from "@/utils/date";
+import { absoluteUrl, withBase } from "@/utils/path";
+import { Schema } from "astro-seo-schema";
+
+const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
+const resume = siteConfig.profile?.resume;
+---
+
+<Schema
+	item={{
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: [
+			{
+				"@type": "ListItem",
+				position: 1,
+				name: "Home",
+				item: siteUrl("/"),
+			},
+			{
+				"@type": "ListItem",
+				position: 2,
+				name: "Experience",
+				item: siteUrl("/experience/"),
+			},
+		],
+	}}
+/>
+
+<PageLayout
+	meta={{
+		title: "Experience",
+		description:
+			"Fifteen years across AI engineering, data science and telecom — Passageway, Xaigi, Ericsson, Nagarro and BSNL.",
+	}}
+>
+	<section class="experience" aria-labelledby="experience-label">
+		<div class="section-label" id="experience-label">Experience</div>
+		<p class="intro">
+			Fifteen years of building systems — the last seven in data science and AI, the six before that
+			keeping telecom infrastructure running.
+		</p>
+
+		<div class="timeline">
+			{
+				experience.map((role, idx) => (
+					<div class="post role" style={`--i: ${idx}`}>
+						<div class="post-rail">
+							<time class="post-date" datetime={toDateTimeRange(role.start, role.end)}>
+								{formatDateRange(role.start, role.end)}
+							</time>
+							<span class="post-dot" aria-hidden="true" />
+						</div>
+						<div class="post-body">
+							<h2 class="post-title">
+								{role.role} <span class="at">at</span>{" "}
+								{role.companyUrl ? (
+									<a href={role.companyUrl} rel="noreferrer" target="_blank">
+										{role.company}
+									</a>
+								) : (
+									role.company
+								)}
+							</h2>
+							<div class="role-meta">
+								<span class="role-date">{formatDateRange(role.start, role.end)}</span>
+								<span class="dot">·</span>
+								<span>{role.location}</span>
+							</div>
+							<p class="role-summary">{role.summary}</p>
+							{!!role.highlights?.length && (
+								<ul class="highlights">
+									{role.highlights.map((item) => (
+										<li>{item}</li>
+									))}
+								</ul>
+							)}
+							{!!role.tech?.length && <div class="role-tech">{role.tech.join(" · ")}</div>}
+						</div>
+					</div>
+				))
+			}
+		</div>
+
+		{
+			resume && (
+				<p class="resume">
+					<a href={withBase(resume)}>Download résumé (PDF) →</a>
+				</p>
+			)
+		}
+	</section>
+</PageLayout>
+
+<style>
+	.experience {
+		margin-bottom: 88px;
+	}
+	.intro {
+		font-family: var(--font-serif);
+		font-size: 17.5px;
+		line-height: 1.7;
+		color: hsl(var(--theme-text));
+		margin: 0 0 40px;
+		max-width: 60ch;
+		text-wrap: pretty;
+	}
+	.timeline :global(.role .post-body) {
+		padding-bottom: 44px;
+	}
+	.timeline :global(.role:last-child .post-body) {
+		padding-bottom: 8px;
+	}
+	.timeline :global(.role .post-title) {
+		font-size: 20px;
+		margin-bottom: 8px;
+	}
+	/* The rail already carries the date; on desktop this line is redundant. */
+	.role-meta {
+		display: none;
+	}
+	/* `.post` hover/press styles signal "clickable"; these rows aren't. */
+	.timeline :global(.role:hover .post-title) {
+		color: hsl(var(--theme-text));
+	}
+	.timeline :global(.role:hover .post-dot) {
+		background: hsl(var(--theme-bg));
+		border-color: var(--faint);
+		box-shadow: none;
+	}
+	.timeline :global(.role:hover .post-date) {
+		color: hsl(var(--theme-text) / 0.72);
+	}
+	.timeline :global(.role:active) {
+		transform: none;
+		opacity: 1;
+	}
+	.at {
+		color: hsl(var(--theme-text) / 0.55);
+		font-weight: 400;
+	}
+	.timeline :global(.role .post-title a) {
+		text-decoration: underline;
+		text-decoration-color: hsl(var(--theme-text) / 0.3);
+		text-decoration-thickness: 1px;
+		text-underline-offset: 3px;
+	}
+	.timeline :global(.role .post-title a:hover) {
+		color: hsl(var(--theme-accent));
+	}
+	.role-summary {
+		font-size: 16.5px;
+		line-height: 1.6;
+		color: hsl(var(--theme-text-muted));
+		margin: 0 0 12px;
+		max-width: 58ch;
+		text-wrap: pretty;
+	}
+	.highlights {
+		list-style: none;
+		margin: 0 0 12px;
+		padding: 0;
+		max-width: 58ch;
+	}
+	.highlights li {
+		position: relative;
+		padding-left: 18px;
+		margin-bottom: 7px;
+		font-size: 16px;
+		line-height: 1.55;
+		color: hsl(var(--theme-text) / 0.78);
+		text-wrap: pretty;
+	}
+	.highlights li::before {
+		content: "";
+		position: absolute;
+		left: 2px;
+		top: 0.72em;
+		width: 5px;
+		height: 1px;
+		background: var(--faint);
+	}
+	.role-tech {
+		font-family: var(--font-mono);
+		font-size: 11px;
+		color: hsl(var(--theme-text) / 0.6);
+		letter-spacing: 0.01em;
+		text-wrap: pretty;
+	}
+	.resume {
+		margin: 36px 0 0;
+		font-family: var(--font-sans);
+		font-size: 13.5px;
+	}
+	.resume a {
+		color: hsl(var(--theme-text-muted));
+		text-decoration: underline;
+		text-decoration-color: hsl(var(--theme-text) / 0.35);
+		text-decoration-thickness: 1px;
+		text-underline-offset: 3px;
+		transition: color 0.2s ease, text-decoration-color 0.2s ease;
+	}
+	.resume a:hover {
+		color: hsl(var(--theme-accent));
+		text-decoration-color: hsl(var(--theme-accent));
+	}
+	.resume a:focus-visible {
+		outline: 2px solid hsl(var(--theme-accent));
+		outline-offset: 3px;
+		border-radius: 3px;
+	}
+
+	@media (max-width: 720px) {
+		.intro {
+			font-size: 17px;
+			margin-bottom: 30px;
+		}
+		/* Rail is hidden below 720px, so the date moves inline under the title. */
+		.role-meta {
+			display: block;
+			font-family: var(--font-mono);
+			font-size: 11.5px;
+			color: hsl(var(--theme-text) / 0.6);
+			margin-bottom: 10px;
+			font-variant-numeric: tabular-nums;
+		}
+		.role-meta .dot {
+			margin: 0 6px;
+			color: var(--faint);
+		}
+		.timeline :global(.role .post-rail) {
+			display: none;
+		}
+		.timeline :global(.role .post-title) {
+			font-size: 18px;
+		}
+		.timeline :global(.role .post-body) {
+			padding-bottom: 32px;
+			border-bottom: 1px solid var(--hairline);
+			margin-bottom: 28px;
+		}
+		.timeline :global(.role:last-child .post-body) {
+			border-bottom: 0;
+			margin-bottom: 0;
+		}
+	}
+	@media (max-width: 420px) {
+		.experience {
+			margin-bottom: 56px;
+		}
+		.intro {
+			font-size: 16.5px;
+		}
+		.role-summary,
+		.highlights li {
+			font-size: 15.5px;
+		}
+	}
+</style>

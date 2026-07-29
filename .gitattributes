@@ -1,0 +1,8 @@
+# Keep local content when pulling upstream theme changes from the `theme` remote.
+# Requires (once per clone): git config merge.ours.driver true
+src/site.config.ts    merge=ours
+src/data/*            merge=ours
+src/content/**        merge=ours
+astro.config.ts       merge=ours
+README.md             merge=ours
+public/*              merge=ours

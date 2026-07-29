@@ -1,0 +1,235 @@
+---
+import { certifications, publications } from "@/data/credentials";
+import { skillGroups } from "@/data/skills";
+import PageLayout from "@/layouts/Base.astro";
+import { absoluteUrl } from "@/utils/path";
+import { Schema } from "astro-seo-schema";
+
+const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
+---
+
+<Schema
+	item={{
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: [
+			{
+				"@type": "ListItem",
+				position: 1,
+				name: "Home",
+				item: siteUrl("/"),
+			},
+			{
+				"@type": "ListItem",
+				position: 2,
+				name: "Skills & Certifications",
+				item: siteUrl("/skills/"),
+			},
+		],
+	}}
+/>
+
+<PageLayout
+	meta={{
+		title: "Skills & Certifications",
+		description:
+			"Technical toolkit across GenAI, agents, machine learning, data engineering and cloud — plus certifications and published research.",
+	}}
+>
+	<section class="skills" aria-labelledby="skills-label">
+		<div class="section-label" id="skills-label">Skills</div>
+		<p class="intro">
+			The tools I reach for, grouped roughly by the kind of problem they solve. Depth varies — the
+			work in <a href="#certifications">certifications</a> and on the projects page is the honest
+			signal.
+		</p>
+
+		<dl class="groups">
+			{
+				skillGroups.map((group) => (
+					<div class="group">
+						<dt>{group.name}</dt>
+						<dd>
+							{group.items.join(" · ")}
+							{group.note && <span class="note">{group.note}</span>}
+						</dd>
+					</div>
+				))
+			}
+		</dl>
+	</section>
+
+	{
+		certifications.length > 0 && (
+			<section class="creds" aria-labelledby="certifications">
+				<div class="section-label" id="certifications">
+					Certifications
+				</div>
+				<ul class="work-list">
+					{certifications.map((cert) => (
+						<li>
+							<div class="entry">
+								<div class="head">
+									<span class="name">{cert.title}</span>
+									<span class="stack">{cert.issuer}</span>
+									{cert.date && <span class="badge">{cert.date}</span>}
+								</div>
+								{cert.href && (
+									<p>
+										<a href={cert.href} rel="noreferrer" target="_blank">
+											View credential →
+										</a>
+									</p>
+								)}
+							</div>
+						</li>
+					))}
+				</ul>
+			</section>
+		)
+	}
+
+	{
+		publications.length > 0 && (
+			<section class="creds" aria-labelledby="publications">
+				<div class="section-label" id="publications">
+					Research
+				</div>
+				<ul class="work-list">
+					{publications.map((paper) => (
+						<li>
+							<div class="entry">
+								<div class="head">
+									<span class="name">{paper.title}</span>
+								</div>
+								<p class="venue">
+									{paper.venue}
+									{paper.year && ` · ${paper.year}`}
+									{paper.doi && ` · DOI ${paper.doi}`}
+								</p>
+								{paper.href && (
+									<p>
+										<a href={paper.href} rel="noreferrer" target="_blank">
+											Read the paper →
+										</a>
+									</p>
+								)}
+							</div>
+						</li>
+					))}
+				</ul>
+			</section>
+		)
+	}
+</PageLayout>
+
+<style>
+	.skills {
+		margin-bottom: 72px;
+	}
+	.creds {
+		margin-bottom: 72px;
+	}
+	.intro {
+		font-family: var(--font-serif);
+		font-size: 17.5px;
+		line-height: 1.7;
+		color: hsl(var(--theme-text));
+		margin: 0 0 40px;
+		max-width: 60ch;
+		text-wrap: pretty;
+	}
+	.intro a {
+		color: inherit;
+		text-decoration: underline;
+		text-decoration-color: hsl(var(--theme-text) / 0.35);
+		text-decoration-thickness: 1px;
+		text-underline-offset: 3px;
+	}
+	.intro a:hover {
+		color: hsl(var(--theme-accent));
+		text-decoration-color: hsl(var(--theme-accent));
+	}
+
+	.groups {
+		margin: 0;
+	}
+	.group {
+		padding: 18px 0;
+		border-top: 1px solid var(--hairline);
+	}
+	.group:last-child {
+		border-bottom: 1px solid var(--hairline);
+	}
+	.groups dt {
+		font-family: var(--font-sans);
+		font-size: 11.5px;
+		font-weight: 600;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: hsl(var(--theme-accent));
+		margin-bottom: 8px;
+	}
+	.groups dd {
+		margin: 0;
+		font-size: 16.5px;
+		line-height: 1.62;
+		color: hsl(var(--theme-text-muted));
+		max-width: 62ch;
+		text-wrap: pretty;
+	}
+	.note {
+		display: block;
+		margin-top: 6px;
+		font-size: 14.5px;
+		color: hsl(var(--theme-text) / 0.6);
+	}
+
+	.creds :global(ul.work-list .entry) {
+		display: block;
+	}
+	.creds :global(ul.work-list .name) {
+		font-size: 18px;
+		font-weight: 500;
+	}
+	.venue {
+		font-family: var(--font-mono);
+		font-size: 11.5px;
+		color: hsl(var(--theme-text) / 0.6);
+	}
+	.creds :global(ul.work-list a) {
+		display: inline;
+		font-family: var(--font-sans);
+		font-size: 13.5px;
+		color: hsl(var(--theme-text-muted));
+		text-decoration: underline;
+		text-decoration-color: hsl(var(--theme-text) / 0.35);
+		text-underline-offset: 3px;
+	}
+	.creds :global(ul.work-list a:hover) {
+		color: hsl(var(--theme-accent));
+		text-decoration-color: hsl(var(--theme-accent));
+	}
+
+	@media (max-width: 720px) {
+		.intro {
+			font-size: 17px;
+			margin-bottom: 30px;
+		}
+		.groups dd {
+			font-size: 16px;
+		}
+	}
+	@media (max-width: 420px) {
+		.skills,
+		.creds {
+			margin-bottom: 52px;
+		}
+		.intro {
+			font-size: 16.5px;
+		}
+		.groups dd {
+			font-size: 15.5px;
+		}
+	}
+</style>

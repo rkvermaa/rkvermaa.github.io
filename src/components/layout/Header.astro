@@ -1,16 +1,29 @@
 ---
-import { showcase } from "@/data/showcase";
+import { projects } from "@/data/projects";
+import { writing } from "@/data/writing";
 import { menuLinks, siteConfig } from "@/site-config";
+import type { MenuChild, MenuLink } from "@/types";
 import { withBase } from "@/utils/path";
 import ThemeToggle from "../ThemeToggle.astro";
 
 const url = new URL(Astro.request.url);
 const wordmark = siteConfig.title;
 
-const visibleMenuLinks = menuLinks.filter((link) => {
-	if (link.path === "/showcase/" && showcase.length === 0) return false;
-	return true;
-});
+/** Sections that hide themselves until their data file has entries. */
+const emptySections = new Set(
+	[projects.length === 0 ? "/projects/" : null, writing.length === 0 ? "/writing/" : null].filter(
+		(path): path is string => path !== null,
+	),
+);
+
+const keepLink = (path: string | undefined) => !path || !emptySections.has(path);
+
+const visibleMenuLinks: MenuLink[] = menuLinks
+	.map((link) =>
+		link.children ? { ...link, children: link.children.filter((c) => keepLink(c.path)) } : link,
+	)
+	// A dropdown whose children all vanished has nothing left to point at.
+	.filter((link) => keepLink(link.path) && (!link.children || link.children.length > 0));
 
 const isActive = (path: string) => {
 	const target = withBase(path);
@@ -18,15 +31,28 @@ const isActive = (path: string) => {
 	return url.pathname === target || url.pathname.startsWith(target);
 };
 
+/** A dropdown trigger is active when any of its children is. */
+const isBranchActive = (link: MenuLink) =>
+	(link.path ? isActive(link.path) : false) ||
+	(link.children?.some((child) => isActive(child.path)) ?? false);
+
 const navIcons: Record<string, string> = {
 	"/": '<path d="M2.5 6.5 8 2l5.5 4.5V13a1 1 0 0 1-1 1h-2.5v-4h-4v4H3.5a1 1 0 0 1-1-1Z"/>',
-	"/posts/":
+	"/writing/":
 		'<path d="M3 2.5h7l3 3V13a.5.5 0 0 1-.5.5h-9.5a.5.5 0 0 1-.5-.5V3a.5.5 0 0 1 .5-.5Z"/><path d="M10 2.5V5.5h3"/><path d="M5.5 8.5h5"/><path d="M5.5 11h3.5"/>',
-	"/showcase/":
+	"/projects/":
 		'<rect x="2" y="4.5" width="12" height="8.5" rx="1"/><path d="M5.5 4.5V3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1.5"/>',
-	"/about/":
-		'<circle cx="8" cy="6" r="2.5"/><path d="M3 13c.6-2.4 2.6-3.5 5-3.5s4.4 1.1 5 3.5"/>',
+	"/about/": '<circle cx="8" cy="6" r="2.5"/><path d="M3 13c.6-2.4 2.6-3.5 5-3.5s4.4 1.1 5 3.5"/>',
+	"/contact/":
+		'<rect x="2" y="3.5" width="12" height="9" rx="1"/><path d="m2.5 4.5 5.5 4 5.5-4"/>',
+	"/experience/":
+		'<path d="M2.5 5.5h11v7a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1Z"/><path d="M6 5.5V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1.5"/><path d="M2.5 8.5h11"/>',
+	"/skills/":
+		'<path d="M8 2.5 9.6 6l3.9.4-2.9 2.6.8 3.8L8 10.9l-3.4 1.9.8-3.8L2.5 6.4 6.4 6Z"/>',
 };
+
+/** `<summary>` can't carry a nested <a>, so dropdown parents render text only. */
+const iconFor = (path: string | undefined) => (path ? (navIcons[path] ?? "") : "");
 ---
 
 <header class="site-header" id="main-header">
@@ -34,36 +60,102 @@ const navIcons: Record<string, string> = {
 	<div class="header-right">
 		<nav class="nav" aria-label="Primary">
 			{
-				visibleMenuLinks.map((link) => (
-					<a
-						aria-current={isActive(link.path) ? "page" : false}
-						class:list={[{ active: isActive(link.path) }]}
-						data-astro-prefetch
-						href={withBase(link.path)}
-					>
-						<svg
-							aria-hidden="true"
-							viewBox="0 0 16 16"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.5"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							set:html={navIcons[link.path] ?? ""}
-						/>
-						<span>{link.title}</span>
-					</a>
-				))
+				visibleMenuLinks.map((link) =>
+					link.children ? (
+						<details class="nav-menu">
+							<summary class:list={[{ active: isBranchActive(link) }]}>
+								<span>{link.title}</span>
+								<svg
+									class="chev"
+									aria-hidden="true"
+									viewBox="0 0 10 6"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								>
+									<path d="M1 1.5 5 4.5 9 1.5" />
+								</svg>
+							</summary>
+							<ul>
+								{link.children.map((child: MenuChild) => (
+									<li>
+										<a
+											aria-current={isActive(child.path) ? "page" : false}
+											class:list={[{ active: isActive(child.path) }]}
+											data-astro-prefetch
+											href={withBase(child.path)}
+										>
+											{child.title}
+										</a>
+									</li>
+								))}
+							</ul>
+						</details>
+					) : (
+						<a
+							aria-current={isActive(link.path ?? "/") ? "page" : false}
+							class:list={[{ active: isActive(link.path ?? "/") }]}
+							data-astro-prefetch
+							href={withBase(link.path ?? "/")}
+						>
+							<svg
+								aria-hidden="true"
+								viewBox="0 0 16 16"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.5"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								set:html={iconFor(link.path)}
+							/>
+							<span>{link.title}</span>
+						</a>
+					),
+				)
 			}
 		</nav>
 		<ThemeToggle />
 	</div>
 </header>
 
+<script>
+	// Progressive enhancement only — <details> already opens, closes and is
+	// keyboard-operable without this. Adds outside-click, Escape, and
+	// close-the-others behaviour that native <details> doesn't provide.
+	const menus = Array.from(document.querySelectorAll<HTMLDetailsElement>(".nav-menu"));
+
+	for (const menu of menus) {
+		menu.addEventListener("toggle", () => {
+			if (!menu.open) return;
+			for (const other of menus) {
+				if (other !== menu) other.open = false;
+			}
+		});
+	}
+
+	document.addEventListener("click", (event) => {
+		const target = event.target as Node;
+		for (const menu of menus) {
+			if (menu.open && !menu.contains(target)) menu.open = false;
+		}
+	});
+
+	document.addEventListener("keydown", (event) => {
+		if (event.key !== "Escape") return;
+		for (const menu of menus) {
+			if (!menu.open) continue;
+			menu.open = false;
+			menu.querySelector("summary")?.focus();
+		}
+	});
+</script>
+
 <style>
 	.site-header {
 		display: flex;
-		align-items: baseline;
+		align-items: center;
 		justify-content: space-between;
 		gap: 24px;
 		margin-bottom: 72px;
@@ -81,25 +173,26 @@ const navIcons: Record<string, string> = {
 	}
 	.header-right {
 		display: flex;
-		align-items: baseline;
+		align-items: center;
 		gap: 22px;
 	}
 	.nav {
 		display: flex;
-		align-items: baseline;
+		align-items: center;
 		gap: 22px;
 		font-family: var(--font-sans);
 		font-size: 13.5px;
 		color: hsl(var(--theme-text) / 0.72);
 	}
-	.nav a {
+	.nav > a {
 		display: inline-block;
 		position: relative;
 		padding-bottom: 3px;
 		transition: color 0.2s ease;
 	}
 	/* Indicator overhangs the text slightly so the underline isn't abrupt. */
-	.nav a::after {
+	.nav > a::after,
+	.nav-menu > summary::after {
 		content: "";
 		position: absolute;
 		left: -3px;
@@ -119,11 +212,87 @@ const navIcons: Record<string, string> = {
 	.nav a:hover {
 		color: hsl(var(--theme-accent));
 	}
-	.nav a.active {
+	.nav > a.active {
 		color: hsl(var(--theme-text));
 	}
-	.nav a.active::after {
+	.nav > a.active::after {
 		background: hsl(var(--theme-accent));
+	}
+
+	/* ---------- Dropdown ---------- */
+	.nav-menu {
+		position: relative;
+	}
+	.nav-menu > summary {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		position: relative;
+		padding-bottom: 3px;
+		list-style: none;
+		cursor: pointer;
+		transition: color 0.2s ease;
+	}
+	/* Both spellings are needed: Firefox honours `list-style`, WebKit the marker. */
+	.nav-menu > summary::-webkit-details-marker {
+		display: none;
+	}
+	.nav-menu > summary:hover {
+		color: hsl(var(--theme-accent));
+	}
+	.nav-menu > summary.active {
+		color: hsl(var(--theme-text));
+	}
+	.nav-menu > summary.active::after {
+		background: hsl(var(--theme-accent));
+	}
+	.nav-menu > summary:focus-visible {
+		outline: 2px solid hsl(var(--theme-accent));
+		outline-offset: 3px;
+		border-radius: 3px;
+	}
+	.nav-menu .chev {
+		width: 9px;
+		height: 6px;
+		flex: none;
+		transition: transform 0.18s ease;
+	}
+	.nav-menu[open] .chev {
+		transform: rotate(180deg);
+	}
+
+	.nav-menu > ul {
+		position: absolute;
+		z-index: 20;
+		top: 100%;
+		left: -14px;
+		margin: 10px 0 0;
+		padding: 6px 0;
+		min-width: 200px;
+		list-style: none;
+		/* Opaque so the panel works in both themes without a shadow. */
+		background: hsl(var(--theme-bg));
+		border: 1px solid var(--hairline);
+	}
+	.nav-menu > ul a {
+		display: block;
+		padding: 7px 14px;
+		white-space: nowrap;
+		color: hsl(var(--theme-text) / 0.72);
+	}
+	.nav-menu > ul a.active {
+		color: hsl(var(--theme-text));
+		background: var(--accent-soft);
+	}
+	.nav-menu > ul a:focus-visible {
+		outline: 2px solid hsl(var(--theme-accent));
+		outline-offset: -2px;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.nav-menu .chev {
+			transition: none;
+		}
 	}
 
 	@media (max-width: 720px) {
@@ -146,15 +315,40 @@ const navIcons: Record<string, string> = {
 			gap: 22px;
 			font-size: 13px;
 			flex-wrap: wrap;
+			align-items: flex-start;
 			justify-content: flex-start;
 		}
-		.nav a {
+		.nav > a {
 			/* Add top tap padding; desktop rule keeps the indicator space below. */
 			padding-top: 6px;
 		}
 		.nav a svg {
 			width: 13px;
 			height: 13px;
+		}
+		/* Dropdown becomes an inline accordion that pushes the page down. */
+		.nav-menu {
+			width: 100%;
+		}
+		.nav-menu > summary {
+			padding: 6px 0 3px;
+		}
+		.nav-menu > ul {
+			position: static;
+			min-width: 0;
+			margin: 6px 0 2px 2px;
+			padding: 0 0 0 12px;
+			border: 0;
+			border-left: 1px solid var(--hairline);
+			background: transparent;
+		}
+		.nav-menu > ul a {
+			padding: 8px 0;
+			white-space: normal;
+		}
+		.nav-menu > ul a.active {
+			background: transparent;
+			color: hsl(var(--theme-accent));
 		}
 	}
 
