@@ -1,21 +1,27 @@
-# Python-generated files
-__pycache__/
-*.py[oc]
-build/
+# build output
 dist/
-wheels/
-*.egg-info
+.output/
 
-# Virtual environments
-.venv
+# dependencies
+node_modules/
 
-# Reference and temporary files
-reference_portfolio_website/
-*.zip
-llms-ctx.txt
-.sesskey
-CLAUDE.md
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Zensical cache (but keep built site)
-learning/.cache/
 
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# misc
+*.pem
+.cache
+.astro
+.idea
+temp/
