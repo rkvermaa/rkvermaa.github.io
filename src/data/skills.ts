@@ -1,0 +1,123 @@
+export interface SkillGroup {
+	name: string;
+	items: string[];
+	/** Optional one-line gloss shown under the group heading. */
+	note?: string;
+}
+
+export const skillGroups: SkillGroup[] = [
+	{
+		name: "GenAI & LLMs",
+		items: [
+			"Generative AI",
+			"GPT-4",
+			"Claude",
+			"Gemini",
+			"LLaMA",
+			"Mixtral",
+			"Prompt engineering",
+			"RAG",
+			"Vector databases (Pinecone, Chroma, FAISS)",
+			"LlamaIndex",
+			"LlamaParse",
+			"Hugging Face Transformers",
+			"Whisper",
+			"Docling",
+		],
+	},
+	{
+		name: "Agents & Multi-Agent Systems",
+		items: [
+			"LangChain",
+			"LangGraph",
+			"LangGraph subgraphs",
+			"Supervisor agents",
+			"SQLAgent",
+			"PandasAgent",
+			"Tool and function calling",
+			"Chatbot development",
+		],
+	},
+	{
+		name: "Machine Learning & NLP",
+		items: [
+			"Classification",
+			"Regression",
+			"Clustering",
+			"Anomaly detection",
+			"Time-series forecasting",
+			"XGBoost",
+			"Random Forest",
+			"Decision trees",
+			"CNNs",
+			"GANs",
+			"VAEs",
+			"Diffusion models",
+			"Topic modelling (LDA)",
+			"Sentiment analysis",
+			"TensorFlow",
+			"PyTorch",
+			"scikit-learn",
+			"NLTK",
+		],
+	},
+	{
+		name: "Data Engineering & Storage",
+		items: [
+			"Data lakehouse architecture",
+			"ETL/ELT pipelines",
+			"PySpark",
+			"Prefect",
+			"Argo Workflows",
+			"Polars",
+			"DuckDB",
+			"ClickHouse",
+			"MinIO",
+			"Dremio",
+			"SQL",
+			"PostgreSQL",
+			"MySQL",
+			"MongoDB",
+			"Redis",
+		],
+	},
+	{
+		name: "Cloud, MLOps & DevOps",
+		items: [
+			"AWS (EC2, S3, SES)",
+			"Azure (Databricks, Data Lake)",
+			"GCP (BigQuery, Document AI)",
+			"Docker",
+			"Kubernetes",
+			"CI/CD",
+			"MLflow",
+			"LangSmith",
+		],
+	},
+	{
+		name: "Backend & APIs",
+		items: [
+			"Python",
+			"FastAPI",
+			"Django REST Framework",
+			"Pydantic",
+			"OAuth 2.0",
+			"JWT authentication",
+			"Postman",
+			"Swagger",
+			"Git",
+		],
+	},
+	{
+		name: "Visualisation & Reporting",
+		items: [
+			"Tableau",
+			"Power BI",
+			"Streamlit",
+			"Plotly",
+			"Apache ECharts",
+			"Matplotlib",
+			"Seaborn",
+		],
+	},
+];

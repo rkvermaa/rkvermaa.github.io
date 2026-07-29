@@ -57,3 +57,36 @@ export function formatBylineDate(date: Date): string {
 export function formatEyebrowDate(date: Date): string {
 	return eyebrowFormatter.format(date);
 }
+
+const monthYearFormatter = new Intl.DateTimeFormat("en-US", {
+	month: "short",
+	year: "numeric",
+});
+
+/**
+ * Parse a `YYYY-MM` (or `YYYY`) string as a local date. `new Date("2025-08")`
+ * would be parsed as UTC and can shift a month backwards west of Greenwich.
+ */
+function parseYearMonth(value: string): Date {
+	const [rawYear = "", rawMonth = "1"] = value.split("-");
+	const year = Number.parseInt(rawYear, 10);
+	const month = Number.parseInt(rawMonth, 10);
+	return new Date(Number.isNaN(year) ? 1970 : year, (Number.isNaN(month) ? 1 : month) - 1, 1);
+}
+
+/** Résumé date range from `YYYY-MM` values: `Aug 2025 — Present`. */
+export function formatDateRange(start: string, end: string | "present"): string {
+	const from = monthYearFormatter.format(parseYearMonth(start));
+	const to = end === "present" ? "Present" : monthYearFormatter.format(parseYearMonth(end));
+	return `${from} — ${to}`;
+}
+
+/** Education-style year range: `2016 — 2018`. */
+export function formatYearRange(start: string, end: string | "present"): string {
+	return `${start} — ${end === "present" ? "Present" : end}`;
+}
+
+/** Machine-readable duration for `<time datetime>`: `2025-08/..`. */
+export function toDateTimeRange(start: string, end: string | "present"): string {
+	return `${start}/${end === "present" ? ".." : end}`;
+}

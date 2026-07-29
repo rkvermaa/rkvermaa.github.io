@@ -1,8 +1,8 @@
-import type { SiteConfig } from "@/types";
+import type { MenuLink, SiteConfig } from "@/types";
 import type { AstroExpressiveCodeOptions } from "astro-expressive-code";
 
 export const siteConfig: SiteConfig = {
-	author: "Your Name",
+	author: "Ravi Kumar Verma",
 	date: {
 		locale: "en-US",
 		options: {
@@ -12,22 +12,33 @@ export const siteConfig: SiteConfig = {
 		},
 	},
 	description:
-		"A minimal personal blog & writing space, built with Astro. Notes on whatever I happen to be thinking about — usually some mix of code, design, and the occasional half-formed idea. Replace this paragraph in src/site.config.ts to make the site your own.",
+		"Full-Stack AI Engineer working on GenAI, multi-agent systems and large-scale data platforms. Currently Lead Data Scientist at Passageway.",
+	intro: `I'm Ravi — a Full-Stack AI Engineer working where large language models meet large-scale data.
+
+For the past seven years I've built GenAI systems, multi-agent workflows and the data platforms underneath them. Right now I lead smart meter analytics at Passageway, across a fleet of more than 600,000 meters.`,
 	lang: "en-US",
 	ogLocale: "en_US",
 	sortPostsByUpdatedDate: false,
-	title: "Astro Sienna",
+	title: "Ravi Kumar Verma",
 	hideThemeCredit: false,
 	profile: {
-		name: "John Doe",
-		email: "john@example.com",
-		github: "https://github.com/example",
-		linkedin: "https://www.linkedin.com/in/example/",
-		jobTitle: "Software Engineer",
-		employer: "Example Inc.",
-		employerUrl: "https://example.com",
-		alumni: "Example University",
+		name: "Ravi Kumar Verma",
+		tagline: "Full-Stack AI Engineer",
+		email: "rkverma87@gmail.com",
+		phone: "+91 74092 10692",
+		location: "India",
+		github: "https://github.com/rkvermaa",
+		linkedin: "https://www.linkedin.com/in/ravi-kumar-verma-16837734/",
+		medium: "https://medium.com/@rkverma87",
+		jobTitle: "Lead Data Scientist",
+		employer: "Passageway",
+		alumni: "IIT Roorkee",
 		avatar: "/avatar.png",
+		resume: "/cv.pdf",
+	},
+	contact: {
+		// Publishable client-side key — see ContactConfig in src/types.ts.
+		web3formsKey: "6966093a-93c7-4b63-b7a9-e7b303b92b6d",
 	},
 	// Uncomment & fill in to enable Giscus comments on every post.
 	// comments: {
@@ -43,22 +54,30 @@ export const siteConfig: SiteConfig = {
 	// },
 };
 
-export const menuLinks: { path: string; title: string }[] = [
+export const menuLinks: MenuLink[] = [
 	{
 		path: "/",
 		title: "Home",
 	},
 	{
-		path: "/posts/",
-		title: "Posts",
+		title: "Work",
+		children: [
+			{ path: "/experience/", title: "Experience" },
+			{ path: "/projects/", title: "Projects" },
+			{ path: "/skills/", title: "Skills & Certifications" },
+		],
 	},
 	{
-		path: "/showcase/",
-		title: "Showcase",
+		path: "/writing/",
+		title: "Writing",
 	},
 	{
 		path: "/about/",
 		title: "About",
+	},
+	{
+		path: "/contact/",
+		title: "Contact",
 	},
 ];
 
