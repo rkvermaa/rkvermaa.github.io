@@ -40,19 +40,18 @@ const navIcons: Record<string, string> = {
 	"/": '<path d="M2.5 6.5 8 2l5.5 4.5V13a1 1 0 0 1-1 1h-2.5v-4h-4v4H3.5a1 1 0 0 1-1-1Z"/>',
 	"/writing/":
 		'<path d="M3 2.5h7l3 3V13a.5.5 0 0 1-.5.5h-9.5a.5.5 0 0 1-.5-.5V3a.5.5 0 0 1 .5-.5Z"/><path d="M10 2.5V5.5h3"/><path d="M5.5 8.5h5"/><path d="M5.5 11h3.5"/>',
-	"/projects/":
-		'<rect x="2" y="4.5" width="12" height="8.5" rx="1"/><path d="M5.5 4.5V3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1.5"/>',
 	"/about/": '<circle cx="8" cy="6" r="2.5"/><path d="M3 13c.6-2.4 2.6-3.5 5-3.5s4.4 1.1 5 3.5"/>',
 	"/contact/":
 		'<rect x="2" y="3.5" width="12" height="9" rx="1"/><path d="m2.5 4.5 5.5 4 5.5-4"/>',
-	"/experience/":
-		'<path d="M2.5 5.5h11v7a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1Z"/><path d="M6 5.5V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1.5"/><path d="M2.5 8.5h11"/>',
-	"/skills/":
-		'<path d="M8 2.5 9.6 6l3.9.4-2.9 2.6.8 3.8L8 10.9l-3.4 1.9.8-3.8L2.5 6.4 6.4 6Z"/>',
+	briefcase:
+		'<rect x="2" y="4.5" width="12" height="8.5" rx="1.25"/><path d="M5.75 4.5V3.25a1.25 1.25 0 0 1 1.25-1.25h2a1.25 1.25 0 0 1 1.25 1.25V4.5"/><path d="M2 7.75h12"/>',
 };
 
-/** `<summary>` can't carry a nested <a>, so dropdown parents render text only. */
-const iconFor = (path: string | undefined) => (path ? (navIcons[path] ?? "") : "");
+/** Dropdown triggers have no `path`, so they name their icon explicitly. */
+const iconFor = (link: MenuLink) => {
+	const key = link.icon ?? link.path;
+	return key ? (navIcons[key] ?? "") : "";
+};
 ---
 
 <header class="site-header" id="main-header">
@@ -64,6 +63,17 @@ const iconFor = (path: string | undefined) => (path ? (navIcons[path] ?? "") : "
 					link.children ? (
 						<details class="nav-menu">
 							<summary class:list={[{ active: isBranchActive(link) }]}>
+								<svg
+									class="nav-icon"
+									aria-hidden="true"
+									viewBox="0 0 16 16"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.5"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									set:html={iconFor(link)}
+								/>
 								<span>{link.title}</span>
 								<svg
 									class="chev"
@@ -101,6 +111,7 @@ const iconFor = (path: string | undefined) => (path ? (navIcons[path] ?? "") : "
 							href={withBase(link.path ?? "/")}
 						>
 							<svg
+								class="nav-icon"
 								aria-hidden="true"
 								viewBox="0 0 16 16"
 								fill="none"
@@ -108,7 +119,7 @@ const iconFor = (path: string | undefined) => (path ? (navIcons[path] ?? "") : "
 								stroke-width="1.5"
 								stroke-linecap="round"
 								stroke-linejoin="round"
-								set:html={iconFor(link.path)}
+								set:html={iconFor(link)}
 							/>
 							<span>{link.title}</span>
 						</a>
@@ -201,13 +212,18 @@ const iconFor = (path: string | undefined) => (path ? (navIcons[path] ?? "") : "
 		height: 1px;
 		background: transparent;
 	}
-	.nav a svg {
+	.nav .nav-icon {
 		display: inline-block;
 		width: 14px;
 		height: 14px;
+		flex: none;
 		stroke: currentColor;
 		vertical-align: -2px;
 		margin-right: 6px;
+	}
+	/* The summary is a flex row, so the icon's inline margin becomes the gap. */
+	.nav-menu > summary .nav-icon {
+		margin-right: 1px;
 	}
 	.nav a:hover {
 		color: hsl(var(--theme-accent));
@@ -322,7 +338,7 @@ const iconFor = (path: string | undefined) => (path ? (navIcons[path] ?? "") : "
 			/* Add top tap padding; desktop rule keeps the indicator space below. */
 			padding-top: 6px;
 		}
-		.nav a svg {
+		.nav .nav-icon {
 			width: 13px;
 			height: 13px;
 		}
@@ -364,7 +380,7 @@ const iconFor = (path: string | undefined) => (path ? (navIcons[path] ?? "") : "
 			gap: 18px;
 			font-size: 12.5px;
 		}
-		.nav a svg {
+		.nav .nav-icon {
 			display: none;
 		}
 	}

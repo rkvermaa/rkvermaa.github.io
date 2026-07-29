@@ -53,6 +53,9 @@ export interface MenuChild {
 export interface MenuLink {
 	path?: string;
 	title: string;
+	/** Key into `navIcons` in Header.astro. Dropdown triggers need this since
+	 *  they have no `path` to look an icon up by. */
+	icon?: string;
 	children?: MenuChild[];
 }
 

@@ -53,6 +53,7 @@ export const menuLinks: MenuLink[] = [
 	},
 	{
 		title: "Work",
+		icon: "briefcase",
 		children: [
 			{ path: "/experience/", title: "Experience" },
 			{ path: "/projects/", title: "Projects" },
