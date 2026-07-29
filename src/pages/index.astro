@@ -114,18 +114,18 @@ const recentWriting = writing.slice(0, 3);
 								<a href={project.href} rel="noreferrer" target="_blank">
 									<div class="head">
 										<span class="name">{project.name}</span>
-										<span class="stack">{stackLine(project)}</span>
 										{project.badge && <span class="badge">{project.badge}</span>}
 									</div>
+									<div class="stack">{stackLine(project)}</div>
 									<p>{project.desc}</p>
 								</a>
 							) : (
 								<div class="entry">
 									<div class="head">
 										<span class="name">{project.name}</span>
-										<span class="stack">{stackLine(project)}</span>
 										{project.badge && <span class="badge">{project.badge}</span>}
 									</div>
+									<div class="stack">{stackLine(project)}</div>
 									<p>{project.desc}</p>
 								</div>
 							)}
@@ -207,6 +207,10 @@ const recentWriting = writing.slice(0, 3);
 	.experience {
 		margin-bottom: 84px;
 	}
+	/* Date ranges need a wider rail than the theme's single-date default. */
+	.timeline {
+		--rail-width: 172px;
+	}
 	.at {
 		color: hsl(var(--theme-text) / 0.55);
 		font-weight: 400;
@@ -264,6 +268,17 @@ const recentWriting = writing.slice(0, 3);
 	}
 	.work :global(ul.work-list .entry) {
 		display: block;
+	}
+	/* Long project names make name + stack + badge wrap unpredictably on one
+	   line, so the stack gets its own. */
+	.work :global(ul.work-list .head) {
+		margin-bottom: 4px;
+	}
+	.work :global(ul.work-list .stack) {
+		display: block;
+	}
+	.work :global(ul.work-list .badge) {
+		flex: none;
 	}
 	.more {
 		margin: 14px 0 0;

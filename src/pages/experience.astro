@@ -109,6 +109,11 @@ const resume = siteConfig.profile?.resume;
 		max-width: 60ch;
 		text-wrap: pretty;
 	}
+	/* The theme sizes the rail for a single date ("5 Mar 2026"); a range needs
+	   more room or it overruns the rule and the dot. */
+	.timeline {
+		--rail-width: 172px;
+	}
 	.timeline :global(.role .post-body) {
 		padding-bottom: 44px;
 	}

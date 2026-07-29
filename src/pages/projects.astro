@@ -49,9 +49,9 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 						<>
 							<div class="head">
 								<span class="name">{project.name}</span>
-								<span class="stack">{stackLine(project)}</span>
 								{project.badge && <span class="badge">{project.badge}</span>}
 							</div>
+							<div class="stack">{stackLine(project)}</div>
 							<p>{project.desc}</p>
 						</>
 					);
@@ -88,6 +88,17 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 	/* Unlinked entries share the anchor's box but none of its affordances. */
 	.work :global(ul.work-list .entry) {
 		display: block;
+	}
+	/* Project names are long enough that name + stack + badge on one line
+	   wraps unpredictably; the stack gets its own line instead. */
+	.work :global(ul.work-list .head) {
+		margin-bottom: 4px;
+	}
+	.work :global(ul.work-list .stack) {
+		display: block;
+	}
+	.work :global(ul.work-list .badge) {
+		flex: none;
 	}
 
 	@media (max-width: 720px) {
