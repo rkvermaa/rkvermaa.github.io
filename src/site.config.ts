@@ -12,7 +12,7 @@ export const siteConfig: SiteConfig = {
 		},
 	},
 	description:
-		"Building Piecewise, a platform for running AI agents through structured, cost-controlled workflows. Helping teams ship AI agents that hold up in production.",
+		"Ravi Kumar Verma is an AI engineer from Kanpur, India, with 14+ years in tech. He builds AI agents, RAG systems and LLM features that hold up in production.",
 	intro: `Building Piecewise, a platform for running AI agents through structured, cost-controlled workflows. Helping teams ship AI agents that hold up in production.
 
 14+ years in tech, 8+ of them building AI and data systems for finance, telecom and energy.`,
@@ -29,8 +29,7 @@ export const siteConfig: SiteConfig = {
 		github: "https://github.com/rkvermaa",
 		linkedin: "https://www.linkedin.com/in/ravi-kumar-verma-16837734/",
 		medium: "https://medium.com/@rkverma139",
-		jobTitle: "Founder",
-		employer: "Piecewise",
+		jobTitle: "AI Engineer",
 		alumni: "IIT Roorkee",
 		avatar: "/avatar.jpg",
 		resume: "/cv.pdf",
