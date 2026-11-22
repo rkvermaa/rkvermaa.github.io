@@ -23,7 +23,7 @@ export const siteConfig: SiteConfig = {
 	profile: {
 		name: "Ravi Kumar Verma",
 		tagline: "Full-Stack AI Engineer",
-		email: "rkverma87@gmail.com",
+		email: "contact@ravikverma.com",
 		phone: "+91 74092 10692",
 		location: "India",
 		github: "https://github.com/rkvermaa",

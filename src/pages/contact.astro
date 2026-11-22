@@ -194,12 +194,12 @@ const telHref = profile?.phone ? `tel:${profile.phone.replace(/[^\d+]/g, "")}` :
 					form.reset();
 				} else {
 					status.textContent =
-						"That didn't send. Please email me directly at rkverma87@gmail.com.";
+						"That didn't send. Please email me directly at contact@ravikverma.com.";
 					status.className = "status err";
 				}
 			} catch {
 				status.textContent =
-					"That didn't send — check your connection, or email me at rkverma87@gmail.com.";
+					"That didn't send — check your connection, or email me at contact@ravikverma.com.";
 				status.className = "status err";
 			} finally {
 				submit.disabled = false;
