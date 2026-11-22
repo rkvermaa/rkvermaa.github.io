@@ -12,8 +12,8 @@ export const siteConfig: SiteConfig = {
 		},
 	},
 	description:
-		"AI engineer and founder of Piecewise. I help teams ship AI agents, RAG systems and LLM features, and the data platforms underneath.",
-	intro: `AI engineer and founder of Piecewise. I help teams ship AI agents, RAG systems and LLM features, and the data platforms underneath.
+		"Building Piecewise, a platform for running AI agents through structured, cost-controlled workflows. Helping teams ship AI agents that hold up in production.",
+	intro: `Building Piecewise, a platform for running AI agents through structured, cost-controlled workflows. Helping teams ship AI agents that hold up in production.
 
 14+ years in tech, 8+ of them building AI and data systems for finance, telecom and energy.`,
 	lang: "en-US",

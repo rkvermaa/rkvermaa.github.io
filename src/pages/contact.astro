@@ -163,6 +163,16 @@ const telHref = profile?.phone ? `tel:${profile.phone.replace(/[^\d+]/g, "")}` :
 	/* Prefill from a known topic, e.g. /contact/?topic=piecewise-pilot. Only fixed templates
 	   are used, never free text from the URL. Fields the visitor already typed are kept. */
 	const PRESETS: Record<string, { subject: string; message: string }> = {
+		work: {
+			subject: "Working together",
+			message:
+				"Hi Ravi,\n\nI'd like to talk about working together.\n\nCompany / team: \nWhat we're building or need help with: \nTimeline: \n\nThanks!",
+		},
+		call: {
+			subject: "Call request",
+			message:
+				"Hi Ravi,\n\nI couldn't find a booking slot that works for me. Could we find another time?\n\nMy time zone: \nTimes that suit me: \nWhat I'd like to discuss: \n\nThanks!",
+		},
 		"piecewise-pilot": {
 			subject: "Piecewise free pilot",
 			message:
