@@ -1,0 +1,206 @@
+---
+import { type TimelineKind, timeline } from "@/data/timeline";
+import PageLayout from "@/layouts/Base.astro";
+import { absoluteUrl } from "@/utils/path";
+import { Schema } from "astro-seo-schema";
+
+const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
+
+/** Label, colour and 24×24 stroke icon for each kind of event (like Anand's "Life milestone"). */
+const KINDS: Record<TimelineKind, { label: string; color: string; icon: string }> = {
+	milestone: {
+		label: "Life milestone",
+		color: "#4f3ad6",
+		icon: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+	},
+	work: {
+		label: "Work",
+		color: "#0f7b5f",
+		icon: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>',
+	},
+	education: {
+		label: "Education",
+		color: "#c2185b",
+		icon: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/>',
+	},
+	publication: {
+		label: "Publication",
+		color: "#d98a00",
+		icon: '<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+	},
+	launch: {
+		label: "Building",
+		color: "#e4572e",
+		icon: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/>',
+	},
+	writing: {
+		label: "Writing",
+		color: "#2e6be6",
+		icon: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',
+	},
+};
+
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+/** "2026" → "in 2026"; "2025-08" → "in August 2025"; "2025-12-29" → "on December 29, 2025". */
+const when = (date: string) => {
+	const [y, m, d] = date.split("-");
+	if (d) return `on ${MONTHS[Number(m) - 1]} ${Number(d)}, ${y}`;
+	if (m) return `in ${MONTHS[Number(m) - 1]} ${y}`;
+	return `in ${y}`;
+};
+
+/** Newest first; equal dates keep their order in the data file. */
+const events = [...timeline].sort((a, b) => b.date.localeCompare(a.date));
+
+/** Only the first event of each year carries the `#y2024` anchor (ids must be unique). */
+const seenYears = new Set<string>();
+const anchorFor = (date: string) => {
+	const year = date.slice(0, 4);
+	if (seenYears.has(year)) return undefined;
+	seenYears.add(year);
+	return `y${year}`;
+};
+---
+
+<Schema
+	item={{
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: [
+			{ "@type": "ListItem", position: 1, name: "Home", item: siteUrl("/") },
+			{ "@type": "ListItem", position: 2, name: "Life", item: siteUrl("/life/") },
+		],
+	}}
+/>
+
+<PageLayout
+	meta={{
+		title: "Life",
+		description: "A timeline of the moments that shaped my life and work, from my first job at BSNL to building Piecewise.",
+	}}
+>
+	<section aria-labelledby="life-h">
+		<h1 class="label" id="life-h">/life</h1>
+		<p class="intro">The moments that shaped my life and work, newest first.</p>
+
+		<ol class="life-line">
+			{
+				events.map((event) => {
+					const kind = KINDS[event.kind];
+					return (
+						<li class="event" id={anchorFor(event.date)}>
+							<span class="dot" style={`background:${kind.color}`} aria-hidden="true">
+								<svg
+									width="14"
+									height="14"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="#ffffff"
+									stroke-width="2.2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									set:html={kind.icon}
+								/>
+							</span>
+							<p class="meta">
+								<span class="kind" style={`color:${kind.color}`}>{kind.label}</span> {when(event.date)}
+							</p>
+							<h2 class="title">
+								{event.href ? (
+									<a href={event.href} rel="noreferrer" target="_blank">
+										{event.title} ↗
+									</a>
+								) : (
+									event.title
+								)}
+							</h2>
+							{event.description && <p class="desc">{event.description}</p>}
+						</li>
+					);
+				})
+			}
+		</ol>
+	</section>
+</PageLayout>
+
+<style>
+	.label {
+		margin: 0 0 12px;
+		font-family: var(--font-mono);
+		font-size: 12px;
+		font-weight: 400;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: hsl(var(--theme-text) / 0.62);
+	}
+	.intro {
+		margin: 0 0 48px;
+		font-size: 17px;
+		color: hsl(var(--theme-text) / 0.8);
+	}
+
+	/* Vertical line with a coloured icon per event, like anandchowdhary.com/life. */
+	.life-line {
+		list-style: none;
+		margin: 0;
+		padding: 0 0 0 44px;
+		position: relative;
+	}
+	.life-line::before {
+		content: "";
+		position: absolute;
+		left: 13px;
+		top: 6px;
+		bottom: 6px;
+		width: 2px;
+		background: hsl(var(--theme-text) / 0.12);
+		border-radius: 2px;
+	}
+	.event {
+		position: relative;
+		padding-bottom: 40px;
+		scroll-margin-top: 24px;
+	}
+	.event:last-child {
+		padding-bottom: 0;
+	}
+	.dot {
+		position: absolute;
+		left: -44px;
+		top: 0;
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 0 0 0 4px hsl(var(--theme-bg));
+	}
+	.meta {
+		margin: 3px 0 6px;
+		font-size: 14px;
+		color: hsl(var(--theme-text) / 0.6);
+	}
+	.kind {
+		font-weight: 500;
+	}
+	.title {
+		margin: 0;
+		font-family: var(--font-sans);
+		font-size: 17.5px;
+		font-weight: 500;
+		line-height: 1.45;
+		color: hsl(var(--theme-text));
+	}
+	.title a:hover {
+		color: hsl(var(--theme-accent));
+	}
+	.desc {
+		margin: 6px 0 0;
+		max-width: 60ch;
+		font-size: 15px;
+		line-height: 1.6;
+		color: hsl(var(--theme-text) / 0.65);
+	}
+</style>

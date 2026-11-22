@@ -28,7 +28,7 @@ export const siteConfig: SiteConfig = {
 		location: "India",
 		github: "https://github.com/rkvermaa",
 		linkedin: "https://www.linkedin.com/in/ravi-kumar-verma-16837734/",
-		medium: "https://medium.com/@rkverma87",
+		medium: "https://medium.com/@rkverma139",
 		jobTitle: "Founder",
 		employer: "Piecewise",
 		alumni: "IIT Roorkee",

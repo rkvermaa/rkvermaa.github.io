@@ -23,30 +23,19 @@ export const now: NowItem[] = [
 		color: "#1a1a1a",
 	},
 	{
-		before: "Helping teams design and ship",
-		name: "AI agents, RAG systems and LLM features",
-		after: " as an independent consultant.",
+		before: "Helping teams ship",
+		name: "AI agents that hold up in production",
+		after:
+			": agentic workflows, multi-agent systems, agent harnesses, skills, MCP integrations and RAG.",
 		color: "#b83f1a",
 		cta: { label: "Book a call", href: "mailto:rkverma87@gmail.com" },
 	},
 	{
-		before: "Researching materials science with machine learning as a part-time PhD scholar at",
-		name: "IIT Roorkee",
-		after: ".",
-		color: "#8c1d18",
-	},
-	{
-		before: "Teaching aerospace engineering on the side, and writing about AI on",
-		name: "Medium",
-		after: ".",
-		href: "https://medium.com/@rkverma87",
-		color: "#2e6be6",
-	},
-	{
-		before: "Making dev comedy on",
+		before: "Creating a full AI-ML course on",
 		name: "Bug Hai Bhai",
-		after: ", short reels where a developer and his AI sidekick argue about code.",
-		color: "#7a4fd6",
+		after: ", from classical machine learning to modern AI solutions. Coming soon on YouTube.",
+		href: "https://www.youtube.com/@bug_hai_bhai",
+		color: "#e62117",
 	},
 ];
 
@@ -101,6 +90,7 @@ export const tiles: Tile[] = [
 	},
 	{
 		name: "Bug Hai Bhai",
+		href: "https://www.youtube.com/@bug_hai_bhai",
 		bg: "#ffffff",
 		fg: "#e4572e",
 		outline: true,
@@ -114,12 +104,17 @@ export interface LifeFact {
 	color: string;
 	/** Inner SVG markup on a 24×24 viewBox. */
 	icon: string;
+	/** Replace `detail` in the browser with live data (the static text stays as the fallback). */
+	live?: "india-time";
+	/** Optional link for the title. */
+	href?: string;
 }
 
 export const life: LifeFact[] = [
 	{
 		title: "Based in Uttar Pradesh",
 		detail: "India, working with teams worldwide",
+		live: "india-time",
 		color: "#e4572e",
 		icon: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
 	},
@@ -136,9 +131,35 @@ export const life: LifeFact[] = [
 		icon: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z"/>',
 	},
 	{
+		title: "Part-time PhD scholar",
+		detail: "Materials science with ML, IIT Roorkee",
+		color: "#8c1d18",
+		icon: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/>',
+	},
+	{
+		title: "Writing on Medium",
+		detail: "About AI and technology",
+		href: "https://medium.com/@rkverma139",
+		color: "#2e6be6",
+		icon: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/>',
+	},
+	{
 		title: "Making dev comedy",
 		detail: "Reels on Bug Hai Bhai",
+		href: "https://www.instagram.com/bug_hai_bhai/",
 		color: "#7a4fd6",
 		icon: '<rect x="3" y="6" width="18" height="13" rx="3"/><path d="M10 10l5 2.5-5 2.5z"/>',
+	},
+	{
+		title: "Published research paper",
+		detail: "Silicon nanowire solar absorbers, Elsevier",
+		color: "#f2a300",
+		icon: '<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+	},
+	{
+		title: "M.Tech, IIT Roorkee",
+		detail: "Solid State Electronics Materials, 2016–18",
+		color: "#c2185b",
+		icon: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/>',
 	},
 ];

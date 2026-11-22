@@ -17,6 +17,16 @@ export interface ExperienceItem {
 /** Newest first — pages render in array order. */
 export const experience: ExperienceItem[] = [
 	{
+		company: "Bounteous",
+		companyUrl: "https://www.bounteous.com",
+		role: "Associate Manager, Data Science",
+		// TODO(Ravi): confirm location and add a summary + highlights.
+		location: "India",
+		start: "2025-12",
+		end: "present",
+		summary: "Associate Manager in the data science team.",
+	},
+	{
 		company: "Passageway",
 		role: "Lead Data Scientist",
 		location: "Jaipur, India",
