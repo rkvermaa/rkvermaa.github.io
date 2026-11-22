@@ -1,4 +1,5 @@
 ---
+import WorkplaceIcon from "@/components/WorkplaceIcon.astro";
 import { experience } from "@/data/experience";
 import PageLayout from "@/layouts/Base.astro";
 import { siteConfig } from "@/site-config";
@@ -53,6 +54,10 @@ const resume = siteConfig.profile?.resume;
 							<time class="post-date" datetime={toDateTimeRange(role.start, role.end)}>
 								{formatDateRange(role.start, role.end)}
 							</time>
+							<span class="rail-place">
+								<WorkplaceIcon remote={role.remote} />
+								{role.location}
+							</span>
 							<span class="post-dot" aria-hidden="true" />
 						</div>
 						<div class="post-body">
@@ -66,20 +71,13 @@ const resume = siteConfig.profile?.resume;
 									role.company
 								)}
 							</h2>
-							{role.remote && (
-								<span class="remote-tag">
-									<svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" /></svg>
-									Work from home
-								</span>
-							)}
 							<div class="role-meta">
 								<span class="role-date">{formatDateRange(role.start, role.end)}</span>
-								{!role.remote && (
-									<>
-										<span class="dot">·</span>
-										<span>{role.location}</span>
-									</>
-								)}
+								<span class="dot">·</span>
+								<span class="meta-place">
+									<WorkplaceIcon remote={role.remote} />
+									{role.location}
+								</span>
 							</div>
 							<p class="role-summary">{role.summary}</p>
 							{!!role.highlights?.length && (
@@ -110,17 +108,23 @@ const resume = siteConfig.profile?.resume;
 	.experience {
 		margin-bottom: 88px;
 	}
-	.remote-tag {
+	/* Place under the dates in the left rail: icon + "Work from home" or the city. */
+	.rail-place {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 5px;
+		margin-top: 4px;
+		padding-right: 18px;
+		font-size: 11.5px;
+		line-height: 1.35;
+		color: hsl(var(--theme-text) / 0.6);
+		text-align: right;
+	}
+	.meta-place {
 		display: inline-flex;
 		align-items: center;
 		gap: 5px;
-		margin: 2px 0 10px;
-		padding: 2px 9px;
-		border-radius: 999px;
-		background: rgba(15, 123, 95, 0.1);
-		color: #0f7b5f;
-		font-size: 12.5px;
-		font-weight: 500;
 	}
 	.intro {
 		font-family: var(--font-serif);
