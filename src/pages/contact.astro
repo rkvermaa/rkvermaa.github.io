@@ -149,16 +149,6 @@ const telHref = profile?.phone ? `tel:${profile.phone.replace(/[^\d+]/g, "")}` :
 							</div>
 						)
 					}
-					{
-						profile?.resume && (
-							<div>
-								<dt>Résumé</dt>
-								<dd>
-									<a href={withBase(profile.resume)}>Download PDF</a>
-								</dd>
-							</div>
-						)
-					}
 				</dl>
 			</aside>
 		</div>
