@@ -52,7 +52,7 @@ const BUG_HAI_BHAI_YOUTUBE = "https://www.youtube.com/@bug_hai_bhai";
 
 /**
  * /elsewhere: social profiles, then the publications I've been published in
- * (each links to my best story there). Like Anand's /PRESS row.
+ * (each links to my best story there).
  */
 type ElsewhereLink = { label: string; href: string; color: string; icon?: string; text?: string; title?: string };
 const elsewhere: ElsewhereLink[] = [
@@ -118,7 +118,7 @@ const expertise = [
 	{ title: "Data & ML platforms", detail: "Lakehouses, forecasting and production ML" },
 ];
 
-/** Latest four events from the /life timeline, like Anand's /ARCHIVE. */
+/** Latest four events from the /life timeline. */
 const recent = [...timeline].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 4);
 const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 /** Static fallback before the browser swaps in "3 weeks ago". */
@@ -217,7 +217,7 @@ const games = [
 		</ul>
 	</section>
 
-	<!-- Three columns, like the current anandchowdhary.com: a mono /label, then a plain list. -->
+	<!-- Three columns: a mono /label, then a plain list. -->
 	<div class="sections">
 		<section aria-labelledby="edu-h">
 			<h2 class="label" id="edu-h"><a href={withBase("/about/")} data-astro-prefetch>/education</a></h2>
@@ -358,7 +358,7 @@ const games = [
 			</div>
 		</section>
 
-		<!-- Last row, like Anand's /NOTES · /PRESS · /ARCHIVE. -->
+		<!-- Last row: expertise, elsewhere, recently. -->
 		<section aria-labelledby="skills-h">
 			<h2 class="label" id="skills-h"><a href={withBase("/skills/")} data-astro-prefetch>/expertise</a></h2>
 			<ul class="dots">
@@ -605,7 +605,7 @@ const games = [
 		margin: 0;
 		padding: 0;
 		display: grid;
-		/* 4 columns × 2 rows, like the /life grid on anandchowdhary.com. */
+		/* 4 columns × 2 rows. */
 		grid-template-columns: repeat(4, minmax(0, 1fr));
 		gap: 22px 32px;
 	}
@@ -829,7 +829,7 @@ const games = [
 		padding: 14px 18px 18px;
 	}
 
-	/* /say-hello: icon badge + name, like Anand's /PRESS */
+	/* /elsewhere: icon badge + name */
 	.badges {
 		list-style: none;
 		margin: 0;
@@ -858,7 +858,7 @@ const games = [
 		flex: none;
 	}
 
-	/* /recently: dotted mini timeline with "x ago", like Anand's /ARCHIVE */
+	/* /recently: dotted mini timeline with "x ago" */
 	.recent {
 		list-style: none;
 		margin: 0;
