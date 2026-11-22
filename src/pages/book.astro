@@ -6,12 +6,11 @@ import { Schema } from "astro-seo-schema";
 const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 
 /**
- * Google Calendar appointment schedule ("20-minute call with Ravi Kumar Verma").
- * Bookings land in Ravi's Google Calendar with a Meet link; busy times are hidden automatically.
- * Edit hours/duration in Google Calendar → Booking pages, not here.
+ * Booking API: a Google Apps Script web app in Ravi's Google account (see scripts/booking-apps-script/).
+ * GET ?action=slots -> free slots; POST {start,name,email,topic} -> Calendar event + Google Meet invite.
  */
-const BOOKING_URL =
-	"https://calendar.google.com/calendar/appointments/schedules/AcZssZ3C-aJanqpx11Fbe4ztmatnjUg66IMqHllfYU9SMSX_N9ezn3B2VnAS99UraDTzsnMCs7cXt8g9";
+const BOOKING_API =
+	"https://script.google.com/macros/s/AKfycbxiKCF5kRucBHUpSS7c1lvp1s1RaAY4nUngQXlBnjxcxCdj4wkdrLHs-_8MNa9QH688Sw/exec";
 ---
 
 <Schema
@@ -30,27 +29,271 @@ const BOOKING_URL =
 		title: "Book a call",
 		description: "Book a free 20-minute call with Ravi Kumar Verma about AI agents, RAG or automation.",
 	}}
-	wide
 >
-	<section class="book" aria-labelledby="book-h">
+	<section class="book" aria-labelledby="book-h" data-api={BOOKING_API}>
 		<h1 class="label" id="book-h">/book-a-call</h1>
 		<p class="intro">
-			A free 20-minute call about your AI agent, RAG or automation project. Pick a time that suits you;
-			it's shown in your own time zone, and you'll get a Google Meet link by email.
+			A free 20-minute call about your AI agent, RAG or automation project. You'll get a Google Meet
+			invite by email.
 		</p>
 
-		<div class="frame">
-			<iframe
-				src={`${BOOKING_URL}?gv=true`}
-				title="Book a 20-minute call with Ravi Kumar Verma"
-				loading="lazy"></iframe>
+		<div class="card">
+			<!-- Step 1: region + day + time -->
+			<div class="step" data-step="pick">
+				<label class="field-label" for="region">Your region</label>
+				<select id="region" class="region">
+					<option value="india">India</option>
+					<option value="uae">UAE &amp; Middle East</option>
+					<option value="uk">United Kingdom</option>
+					<option value="europe">Europe</option>
+					<option value="us-east">US East (New York)</option>
+					<option value="us-west">US West (California)</option>
+					<option value="other">Other (my local time)</option>
+				</select>
+				<p class="tz-note" data-tz-note></p>
+
+				<p class="field-label">Pick a day</p>
+				<div class="days" data-days role="listbox" aria-label="Available days">
+					<span class="muted">Loading available times…</span>
+				</div>
+
+				<p class="field-label" data-times-label hidden>Pick a time</p>
+				<div class="times" data-times role="listbox" aria-label="Available times"></div>
+			</div>
+
+			<!-- Step 2: details -->
+			<form class="step details" data-step="form" hidden novalidate>
+				<p class="chosen" data-chosen></p>
+				<button type="button" class="link-btn" data-back>‹ Change time</button>
+
+				<label class="field-label" for="b-name">Your name</label>
+				<input id="b-name" name="name" type="text" autocomplete="name" required maxlength="100" />
+
+				<label class="field-label" for="b-email">Email</label>
+				<input id="b-email" name="email" type="email" autocomplete="email" required maxlength="200" />
+
+				<label class="field-label" for="b-topic">What would you like to discuss?</label>
+				<textarea id="b-topic" name="topic" rows="4" required maxlength="1500"
+					placeholder="A line or two about what you're building"></textarea>
+
+				<!-- Honeypot for bots; hidden from people and screen readers. -->
+				<input class="hp" name="company" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+				<p class="error" data-error role="alert" hidden></p>
+				<button type="submit" class="button" data-submit>Confirm booking</button>
+			</form>
+
+			<!-- Step 3: confirmation -->
+			<div class="step done" data-step="done" hidden>
+				<p class="done-title">You're booked ✓</p>
+				<p class="done-text" data-done-text></p>
+				<p class="done-sub">A Google Meet invite is on its way to your email. See you then.</p>
+			</div>
 		</div>
-
-		<p class="fallback">
-			Calendar not loading? <a href={BOOKING_URL} rel="noreferrer" target="_blank">Open the booking page ↗</a>
-		</p>
 	</section>
 </PageLayout>
+
+<script>
+	type RegionKey = "india" | "uae" | "uk" | "europe" | "us-east" | "us-west" | "other";
+	/** Hours are IST (start inclusive, end exclusive, 24 = midnight). Weekend = Sat/Sun in IST. */
+	type Region = { tz: string | null; weekday: [number, number][]; weekend: [number, number][] };
+
+	const REGIONS: Record<RegionKey, Region> = {
+		india: { tz: "Asia/Kolkata", weekday: [[20, 22]], weekend: [[14, 17]] },
+		uae: { tz: "Asia/Dubai", weekday: [[20, 22]], weekend: [] },
+		uk: { tz: "Europe/London", weekday: [[20, 24]], weekend: [] },
+		europe: { tz: "Europe/Berlin", weekday: [[20, 24]], weekend: [] },
+		"us-east": { tz: "America/New_York", weekday: [[22, 24]], weekend: [] },
+		"us-west": { tz: "America/Los_Angeles", weekday: [[22, 24]], weekend: [] },
+		other: { tz: null, weekday: [[20, 24]], weekend: [[14, 17]] },
+	};
+
+	const root = document.querySelector<HTMLElement>(".book")!;
+	const api = root.dataset.api!;
+	const $ = <T extends HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+	const regionSel = $<HTMLSelectElement>("#region");
+	const daysEl = $("[data-days]");
+	const timesEl = $("[data-times]");
+	const timesLabel = $("[data-times-label]");
+	const tzNote = $("[data-tz-note]");
+	const pickStep = $("[data-step='pick']");
+	const form = $<HTMLFormElement>("[data-step='form']");
+	const doneStep = $("[data-step='done']");
+	const errorEl = $("[data-error]");
+	const submitBtn = $<HTMLButtonElement>("[data-submit]");
+
+	const browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+	let slots: Date[] = [];
+	let chosen: Date | null = null;
+	let chosenDay: string | null = null;
+
+	/** Guess the visitor's region from their browser time zone. */
+	function detectRegion(): RegionKey {
+		const tz = browserTz || "";
+		if (/^Asia\/(Kolkata|Calcutta)$/.test(tz)) return "india";
+		if (/^Asia\/(Dubai|Muscat|Riyadh|Qatar|Bahrain|Kuwait)$/.test(tz)) return "uae";
+		if (/^Europe\/(London|Dublin)$/.test(tz)) return "uk";
+		if (/^Europe\//.test(tz)) return "europe";
+		if (/^America\/(Los_Angeles|Vancouver|Denver|Phoenix|Boise|Edmonton)$/.test(tz)) return "us-west";
+		if (/^America\/(New_York|Toronto|Chicago|Detroit|Indiana|Kentucky|Montreal)/.test(tz)) return "us-east";
+		return "other";
+	}
+
+	const regionTz = () => REGIONS[regionSel.value as RegionKey].tz ?? browserTz;
+
+	/** Friendly name for the time zone, e.g. "India time (IST)" or "London time (GMT)". */
+	function tzLabel(): string {
+		const tz = regionTz();
+		const short =
+			new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" })
+				.formatToParts(new Date())
+				.find((p) => p.type === "timeZoneName")?.value ?? "";
+		const names: Record<string, string> = {
+			"Asia/Kolkata": "India",
+			"Asia/Dubai": "UAE",
+			"Europe/London": "London",
+			"Europe/Berlin": "Central European",
+			"America/New_York": "US Eastern",
+			"America/Los_Angeles": "US Pacific",
+		};
+		const city = names[tz] ?? tz.split("/").pop()!.replace(/_/g, " ");
+		const abbr = tz === "Asia/Kolkata" ? "IST" : short;
+		return `${city} time${abbr ? ` (${abbr})` : ""}`;
+	}
+
+	/** Is this slot inside the chosen region's IST windows? */
+	function fitsRegion(d: Date, r: Region): boolean {
+		const ist = new Date(d.getTime() + 5.5 * 3600_000); // read UTC fields as IST
+		const dow = ist.getUTCDay();
+		const hour = ist.getUTCHours() + ist.getUTCMinutes() / 60;
+		const windows = dow === 0 || dow === 6 ? r.weekend : r.weekday;
+		return windows.some(([a, b]) => hour >= a && hour < b);
+	}
+
+	const fmt = (d: Date, opts: Intl.DateTimeFormatOptions) =>
+		new Intl.DateTimeFormat("en-GB", { timeZone: regionTz(), ...opts }).format(d);
+	const dayKey = (d: Date) => fmt(d, { year: "numeric", month: "2-digit", day: "2-digit" });
+
+	function render() {
+		const region = REGIONS[regionSel.value as RegionKey];
+		const tz = regionTz();
+		tzNote.textContent = `Times shown in ${tzLabel()}.`;
+		const mine = slots.filter((s) => fitsRegion(s, region));
+
+		// Group by local day.
+		const byDay = new Map<string, Date[]>();
+		for (const s of mine) {
+			const k = dayKey(s);
+			if (!byDay.has(k)) byDay.set(k, []);
+			byDay.get(k)!.push(s);
+		}
+
+		daysEl.innerHTML = "";
+		timesEl.innerHTML = "";
+		timesLabel.hidden = true;
+		if (byDay.size === 0) {
+			daysEl.innerHTML = `<span class="muted">No free times for this region in the next 3 weeks. Please email instead.</span>`;
+			return;
+		}
+		if (!chosenDay || !byDay.has(chosenDay)) chosenDay = byDay.keys().next().value!;
+
+		for (const [k, list] of byDay) {
+			const b = document.createElement("button");
+			b.type = "button";
+			b.className = "chip";
+			b.setAttribute("role", "option");
+			b.setAttribute("aria-selected", String(k === chosenDay));
+			b.innerHTML = `<span class="chip-dow">${fmt(list[0], { weekday: "short" })}</span><span class="chip-date">${fmt(list[0], { day: "numeric", month: "short" })}</span>`;
+			b.addEventListener("click", () => {
+				chosenDay = k;
+				render();
+			});
+			daysEl.appendChild(b);
+		}
+
+		timesLabel.hidden = false;
+		for (const s of byDay.get(chosenDay!)!) {
+			const b = document.createElement("button");
+			b.type = "button";
+			b.className = "slot";
+			b.setAttribute("role", "option");
+			b.textContent = fmt(s, { hour: "numeric", minute: "2-digit", hour12: true }).replace(" ", " ");
+			b.addEventListener("click", () => choose(s));
+			timesEl.appendChild(b);
+		}
+	}
+
+	function choose(s: Date) {
+		chosen = s;
+		$("[data-chosen]").textContent = `${fmt(s, { weekday: "long", day: "numeric", month: "long" })}, ${fmt(s, { hour: "numeric", minute: "2-digit", hour12: true })} (${tzLabel()})`;
+		pickStep.hidden = true;
+		form.hidden = false;
+		errorEl.hidden = true;
+		$<HTMLInputElement>("#b-name").focus();
+	}
+
+	$("[data-back]").addEventListener("click", () => {
+		form.hidden = true;
+		pickStep.hidden = false;
+	});
+
+	form.addEventListener("submit", async (e) => {
+		e.preventDefault();
+		if (!chosen) return;
+		const data = new FormData(form);
+		const payload = {
+			start: chosen.toISOString(),
+			name: String(data.get("name") || "").trim(),
+			email: String(data.get("email") || "").trim(),
+			topic: String(data.get("topic") || "").trim(),
+			company: String(data.get("company") || ""),
+		};
+		if (!payload.name || !payload.email || !payload.topic) {
+			errorEl.textContent = "Please fill in your name, email and what you'd like to discuss.";
+			errorEl.hidden = false;
+			return;
+		}
+		submitBtn.disabled = true;
+		submitBtn.textContent = "Booking…";
+		errorEl.hidden = true;
+		try {
+			// text/plain body avoids a CORS preflight, which Apps Script doesn't answer.
+			const res = await fetch(api, { method: "POST", body: JSON.stringify(payload) });
+			const json = await res.json();
+			if (!json.ok) throw new Error(json.error || "Booking failed.");
+			$("[data-done-text]").textContent = `${fmt(chosen, { weekday: "long", day: "numeric", month: "long" })} at ${fmt(chosen, { hour: "numeric", minute: "2-digit", hour12: true })} (${tzLabel()}).`;
+			form.hidden = true;
+			doneStep.hidden = false;
+		} catch (err) {
+			errorEl.textContent = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+			errorEl.hidden = false;
+			loadSlots(); // the slot may have been taken; refresh the list
+		} finally {
+			submitBtn.disabled = false;
+			submitBtn.textContent = "Confirm booking";
+		}
+	});
+
+	async function loadSlots() {
+		try {
+			const res = await fetch(`${api}?action=slots`);
+			const json = await res.json();
+			if (!json.ok) throw new Error();
+			slots = (json.slots as string[]).map((s) => new Date(s));
+			render();
+		} catch {
+			daysEl.innerHTML = `<span class="muted">Couldn't load available times. Please refresh, or email instead.</span>`;
+		}
+	}
+
+	regionSel.value = detectRegion();
+	regionSel.addEventListener("change", () => {
+		chosenDay = null;
+		render();
+	});
+	tzNote.textContent = `Times shown in ${tzLabel()}.`;
+	loadSlots();
+</script>
 
 <style>
 	.book {
@@ -67,37 +310,193 @@ const BOOKING_URL =
 	}
 	.intro {
 		margin: 0 0 24px;
-		max-width: 62ch;
+		max-width: 60ch;
 		font-size: 16px;
 		line-height: 1.6;
 		color: hsl(var(--theme-text) / 0.85);
 	}
-	/* Same soft paper card as the home page cards. */
-	.frame {
-		background: #ffffff;
+	/* Same soft paper card as the home page. */
+	.card {
+		background: var(--paper);
 		border-radius: 16px;
 		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-		overflow: hidden;
+		padding: 22px 22px 26px;
 	}
-	.frame iframe {
+	.field-label {
 		display: block;
-		width: 100%;
-		height: 760px;
-		border: 0;
-	}
-	.fallback {
-		margin: 14px 0 0;
-		font-size: 13.5px;
+		margin: 18px 0 8px;
+		font-family: var(--font-mono);
+		font-size: 11.5px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
 		color: hsl(var(--theme-text) / 0.6);
 	}
-	.fallback a {
-		color: hsl(var(--theme-accent));
-		text-decoration: underline;
-		text-underline-offset: 3px;
+	.step > .field-label:first-child {
+		margin-top: 0;
 	}
-	@media (max-width: 600px) {
-		.frame iframe {
-			height: 900px;
-		}
+	.region,
+	input,
+	textarea {
+		width: 100%;
+		box-sizing: border-box;
+		font: inherit;
+		font-size: 15px;
+		color: hsl(var(--theme-text));
+		background: hsl(var(--theme-bg));
+		border: 1px solid hsl(var(--theme-text) / 0.14);
+		border-radius: 10px;
+		padding: 10px 12px;
+	}
+	.region {
+		max-width: 320px;
+	}
+	.region:focus-visible,
+	input:focus-visible,
+	textarea:focus-visible {
+		outline: 2px solid hsl(var(--theme-accent));
+		outline-offset: 1px;
+	}
+	.tz-note {
+		margin: 6px 0 0;
+		font-size: 12.5px;
+		color: hsl(var(--theme-text) / 0.55);
+	}
+	.muted {
+		font-size: 14px;
+		color: hsl(var(--theme-text) / 0.6);
+	}
+
+	/* Day chips */
+	.days {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+	.days :global(.chip) {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		min-width: 58px;
+		padding: 7px 10px;
+		border: 1px solid hsl(var(--theme-text) / 0.16);
+		border-radius: 12px;
+		background: transparent;
+		color: hsl(var(--theme-text));
+		cursor: pointer;
+		font: inherit;
+		transition: border-color 0.15s ease, background 0.15s ease;
+	}
+	.days :global(.chip:hover) {
+		border-color: hsl(var(--theme-accent));
+	}
+	.days :global(.chip[aria-selected="true"]) {
+		background: hsl(var(--theme-text));
+		border-color: hsl(var(--theme-text));
+		color: hsl(var(--theme-bg));
+	}
+	.days :global(.chip-dow) {
+		font-family: var(--font-mono);
+		font-size: 10.5px;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		opacity: 0.7;
+	}
+	.days :global(.chip-date) {
+		font-size: 14px;
+		font-weight: 600;
+	}
+
+	/* Time slots */
+	.times {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+		gap: 8px;
+	}
+	.times :global(.slot) {
+		padding: 9px 0;
+		border: 1px solid hsl(var(--theme-text) / 0.16);
+		border-radius: 10px;
+		background: transparent;
+		color: hsl(var(--theme-text));
+		font: inherit;
+		font-size: 14px;
+		cursor: pointer;
+		transition: border-color 0.15s ease, color 0.15s ease;
+	}
+	.times :global(.slot:hover),
+	.times :global(.slot:focus-visible) {
+		border-color: #e4572e;
+		color: #e4572e;
+		outline: none;
+	}
+
+	/* Details form */
+	.chosen {
+		margin: 0;
+		font-size: 16px;
+		font-weight: 600;
+	}
+	.link-btn {
+		margin-top: 4px;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: hsl(var(--theme-accent));
+		font: inherit;
+		font-size: 13.5px;
+		cursor: pointer;
+	}
+	textarea {
+		resize: vertical;
+	}
+	.hp {
+		position: absolute;
+		left: -9999px;
+		width: 1px;
+		height: 1px;
+		opacity: 0;
+	}
+	.error {
+		margin: 14px 0 0;
+		font-size: 14px;
+		color: #c0392b;
+	}
+	.button {
+		margin-top: 18px;
+		display: inline-block;
+		background: #e4572e;
+		color: #ffffff;
+		padding: 10px 18px;
+		border: 0;
+		border-radius: 10px;
+		font: inherit;
+		font-weight: 600;
+		font-size: 14.5px;
+		cursor: pointer;
+	}
+	.button:hover {
+		background: #c9461f;
+	}
+	.button:disabled {
+		opacity: 0.6;
+		cursor: wait;
+	}
+
+	/* Confirmation */
+	.done-title {
+		margin: 0 0 8px;
+		font-size: 20px;
+		font-weight: 700;
+		color: #0f7b5f;
+	}
+	.done-text {
+		margin: 0;
+		font-size: 16px;
+		font-weight: 600;
+	}
+	.done-sub {
+		margin: 8px 0 0;
+		font-size: 14.5px;
+		color: hsl(var(--theme-text) / 0.7);
 	}
 </style>
