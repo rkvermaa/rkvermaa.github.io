@@ -18,7 +18,7 @@ const {
 	wide = false,
 } = Astro.props;
 
-/** No nav bar (like anandchowdhary.com): inner pages get the signature as a home link instead. */
+/** No nav bar: inner pages get the signature as a home link instead. */
 const isHome = Astro.url.pathname === withBase("/");
 ---
 

@@ -1,5 +1,5 @@
 /**
- * Life timeline for /life/ (like the timeline on anandchowdhary.com/life).
+ * Life timeline for the /life/ page.
  * Newest first. Add personal milestones here too: moves, family, awards, talks.
  *
  * `date` is `YYYY-MM-DD`, `YYYY-MM` or `YYYY`; the page shows only as much as you give.

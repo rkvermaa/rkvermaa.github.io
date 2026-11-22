@@ -6,7 +6,7 @@ import { Schema } from "astro-seo-schema";
 
 const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 
-/** Label, colour and 24×24 stroke icon for each kind of event (like Anand's "Life milestone"). */
+/** Label, colour and 24×24 stroke icon for each kind of event. */
 const KINDS: Record<TimelineKind, { label: string; color: string; icon: string }> = {
 	milestone: {
 		label: "Life milestone",
@@ -140,7 +140,7 @@ const anchorFor = (date: string) => {
 		color: hsl(var(--theme-text) / 0.8);
 	}
 
-	/* Vertical line with a coloured icon per event, like anandchowdhary.com/life. */
+	/* Vertical line with a coloured icon per event. */
 	.life-line {
 		list-style: none;
 		margin: 0;
