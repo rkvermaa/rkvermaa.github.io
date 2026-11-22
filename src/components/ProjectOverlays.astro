@@ -1,0 +1,291 @@
+---
+/**
+ * One <dialog> per project: details on the left, video or image on the right.
+ * Any link with `data-project="<slug>"` (or href "#project-<slug>") opens it.
+ * Uses the native <dialog>, so Esc, focus trapping and the backdrop come for free.
+ */
+import { type Project, projects } from "@/data/projects";
+import { withBase } from "@/utils/path";
+
+interface Props {
+	/** Limit to these slugs; defaults to every project. */
+	only?: string[];
+}
+
+const { only } = Astro.props;
+const list: Project[] = only ? projects.filter((p) => only.includes(p.slug)) : projects;
+---
+
+{
+	list.map((p) => (
+		<dialog class="project-overlay" id={`project-${p.slug}`} aria-labelledby={`project-${p.slug}-title`}>
+			<div class="po-card">
+				<button class="po-close" type="button" aria-label="Close" data-close>
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+				</button>
+				<div class="po-text">
+					<div class="po-meta">
+						{p.badge && <span>{p.badge}</span>}
+						{p.status && <span class="po-status">{p.status}</span>}
+					</div>
+					<h2 id={`project-${p.slug}-title`}>{p.name}</h2>
+					<p class="po-lead">{p.desc}</p>
+					{p.details?.map((para) => <p>{para}</p>)}
+					{p.highlights && (
+						<ul class="po-list">
+							{p.highlights.map((h) => <li>{h}</li>)}
+						</ul>
+					)}
+					<ul class="po-tech" aria-label="Tech">
+						{p.tech.map((t) => <li>{t}</li>)}
+					</ul>
+					{p.href && (
+						<a class="po-link" href={p.href} rel="noreferrer" target="_blank">Visit ›</a>
+					)}
+				</div>
+				<div class="po-media">
+					{p.media?.type === "video" ? (
+						<video
+							controls
+							playsinline
+							preload="none"
+							poster={p.media.poster ? withBase(p.media.poster) : undefined}
+							aria-label={p.media.alt ?? `${p.name} video`}
+						>
+							<source src={withBase(p.media.src)} type="video/mp4" />
+						</video>
+					) : p.media?.type === "image" ? (
+						<img src={withBase(p.media.src)} alt={p.media.alt ?? p.name} loading="lazy" />
+					) : (
+						<div class="po-placeholder" style={p.color ? `--tile:${p.color}` : undefined}>
+							<span class="po-initial" aria-hidden="true">{p.name.charAt(0)}</span>
+							<span>{p.status === "Client work" ? "Client work, no public demo" : "Video coming soon"}</span>
+						</div>
+					)}
+				</div>
+			</div>
+		</dialog>
+	))
+}
+
+<script>
+	function setup() {
+		const open = (slug: string, push = true) => {
+			const dlg = document.getElementById(`project-${slug}`) as HTMLDialogElement | null;
+			if (!dlg || dlg.open) return false;
+			dlg.showModal();
+			if (push) history.replaceState(null, "", `#project-${slug}`);
+			return true;
+		};
+
+		document.addEventListener("click", (e) => {
+			const a = (e.target as HTMLElement).closest<HTMLElement>("[data-project]");
+			if (!a) return;
+			if (open(a.dataset.project!)) e.preventDefault();
+		});
+
+		document.querySelectorAll<HTMLDialogElement>("dialog.project-overlay").forEach((dlg) => {
+			// Click on the backdrop (outside the card) or the close button closes it.
+			dlg.addEventListener("click", (e) => {
+				const t = e.target as HTMLElement;
+				if (t === dlg || t.closest("[data-close]")) dlg.close();
+			});
+			dlg.addEventListener("close", () => {
+				dlg.querySelectorAll("video").forEach((v) => v.pause());
+				if (location.hash === `#${dlg.id}`) history.replaceState(null, "", location.pathname + location.search);
+			});
+		});
+
+		// Deep link: /projects/#project-pcsadda opens straight into the overlay.
+		const m = location.hash.match(/^#project-(.+)$/);
+		if (m) open(m[1], false);
+	}
+	setup();
+</script>
+
+<style>
+	.project-overlay {
+		border: 0;
+		padding: 0;
+		background: transparent;
+		width: min(1040px, calc(100vw - 32px));
+		max-width: none;
+		max-height: calc(100dvh - 32px);
+		margin: auto;
+		color: hsl(var(--theme-text));
+	}
+	.project-overlay:focus,
+	.project-overlay:focus-visible {
+		outline: none;
+	}
+	.project-overlay::backdrop {
+		background: rgba(20, 18, 16, 0.55);
+		backdrop-filter: blur(3px);
+	}
+	.project-overlay[open] {
+		animation: po-in 0.22s ease-out;
+	}
+	@keyframes po-in {
+		from {
+			opacity: 0;
+			transform: translateY(10px) scale(0.985);
+		}
+	}
+	.po-card {
+		position: relative;
+		display: grid;
+		grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.25fr);
+		gap: 28px;
+		padding: 32px;
+		background: hsl(var(--theme-bg));
+		border-radius: 18px;
+		box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+		max-height: calc(100dvh - 32px);
+		overflow: auto;
+	}
+	.po-close {
+		position: absolute;
+		top: 12px;
+		right: 12px;
+		width: 34px;
+		height: 34px;
+		border-radius: 50%;
+		border: 0;
+		background: hsl(var(--theme-text) / 0.07);
+		color: hsl(var(--theme-text));
+		display: grid;
+		place-items: center;
+		cursor: pointer;
+		z-index: 1;
+	}
+	.po-close:hover {
+		background: hsl(var(--theme-text) / 0.14);
+	}
+	.po-close:focus-visible {
+		outline: 2px solid hsl(var(--theme-accent));
+		outline-offset: 2px;
+	}
+	.po-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		font-family: var(--font-mono);
+		font-size: 10.5px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: hsl(var(--theme-text) / 0.6);
+	}
+	.po-status {
+		color: hsl(var(--theme-accent));
+	}
+	.po-text h2 {
+		font-family: var(--font-serif);
+		font-size: 30px;
+		line-height: 1.15;
+		margin: 8px 0 12px;
+	}
+	.po-text p {
+		font-size: 15.5px;
+		line-height: 1.65;
+		color: hsl(var(--theme-text-muted));
+		margin: 0 0 12px;
+	}
+	.po-text .po-lead {
+		color: hsl(var(--theme-text));
+		font-size: 16.5px;
+	}
+	.po-list {
+		margin: 4px 0 16px;
+		padding-left: 18px;
+		font-size: 14.5px;
+		line-height: 1.55;
+		color: hsl(var(--theme-text-muted));
+	}
+	.po-list li {
+		margin: 5px 0;
+		list-style: disc;
+	}
+	.po-list li::marker {
+		color: hsl(var(--theme-accent));
+	}
+	.po-tech {
+		list-style: none;
+		padding: 0;
+		margin: 14px 0 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+	}
+	.po-tech li {
+		font-family: var(--font-mono);
+		font-size: 11px;
+		padding: 4px 9px;
+		border-radius: 999px;
+		background: hsl(var(--theme-text) / 0.06);
+		color: hsl(var(--theme-text) / 0.8);
+	}
+	.po-link {
+		display: inline-block;
+		margin-top: 16px;
+		color: hsl(var(--theme-accent));
+		font-weight: 500;
+	}
+	.po-media {
+		align-self: center;
+		margin-top: 28px;
+	}
+	.po-media video,
+	.po-media img {
+		display: block;
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		object-fit: cover;
+		border-radius: 12px;
+		background: #f6f8fb;
+		box-shadow: 0 0 0 1px hsl(var(--theme-text) / 0.08);
+	}
+	.po-placeholder {
+		aspect-ratio: 16 / 9;
+		border-radius: 12px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 12px;
+		background:
+			radial-gradient(circle at 1px 1px, hsl(var(--theme-text) / 0.12) 1px, transparent 0) 0 0 / 14px 14px,
+			var(--paper, hsl(var(--theme-text) / 0.04));
+		font-family: var(--font-mono);
+		font-size: 12px;
+		letter-spacing: 0.04em;
+		color: hsl(var(--theme-text) / 0.55);
+	}
+	.po-initial {
+		width: 56px;
+		height: 56px;
+		border-radius: 14px;
+		background: var(--tile, #1a1a1a);
+		color: #fff;
+		display: grid;
+		place-items: center;
+		font-family: var(--font-serif);
+		font-size: 26px;
+		font-weight: 600;
+	}
+
+	/* Phone/tablet: media on top, details below. */
+	@media (max-width: 760px) {
+		.po-card {
+			grid-template-columns: 1fr;
+			gap: 18px;
+			padding: 20px;
+		}
+		.po-media {
+			order: -1;
+			margin-top: 30px;
+		}
+		.po-text h2 {
+			font-size: 25px;
+		}
+	}
+</style>

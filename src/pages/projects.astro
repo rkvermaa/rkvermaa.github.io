@@ -1,5 +1,6 @@
 ---
 import { projects, stackLine } from "@/data/projects";
+import ProjectOverlays from "@/components/ProjectOverlays.astro";
 import PageLayout from "@/layouts/Base.astro";
 import { absoluteUrl } from "@/utils/path";
 import { Schema } from "astro-seo-schema";
@@ -38,9 +39,9 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 	<section class="work" aria-labelledby="work-label">
 		<div class="section-label" id="work-label">Projects</div>
 		<p class="intro">
-			Work I've led or built across GenAI, data engineering and machine learning. Most of it was
-			delivered inside client engagements, so the code isn't public — the descriptions are what I
-			can share.
+			Products I'm building and work I've led across GenAI, data engineering and machine learning.
+			Client work isn't public, so the descriptions are what I can share. Click a project for
+			details.
 		</p>
 		<ul class="work-list">
 			{
@@ -57,19 +58,17 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 					);
 					return (
 						<li>
-							{project.href ? (
-								<a href={project.href} rel="noreferrer" target="_blank">
-									{body}
-								</a>
-							) : (
-								<div class="entry">{body}</div>
-							)}
+							<a href={`#project-${project.slug}`} data-project={project.slug}>
+								{body}
+								<span class="more">Details ›</span>
+							</a>
 						</li>
 					);
 				})
 			}
 		</ul>
 	</section>
+	<ProjectOverlays />
 </PageLayout>
 
 <style>
@@ -85,9 +84,13 @@ const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 		max-width: 60ch;
 		text-wrap: pretty;
 	}
-	/* Unlinked entries share the anchor's box but none of its affordances. */
-	.work :global(ul.work-list .entry) {
-		display: block;
+	.more {
+		display: inline-block;
+		margin-top: 8px;
+		font-family: var(--font-mono);
+		font-size: 11.5px;
+		letter-spacing: 0.04em;
+		color: hsl(var(--theme-accent));
 	}
 	/* Project names are long enough that name + stack + badge on one line
 	   wraps unpredictably; the stack gets its own line instead. */
