@@ -160,6 +160,27 @@ const telHref = profile?.phone ? `tel:${profile.phone.replace(/[^\d+]/g, "")}` :
 	const status = document.querySelector<HTMLParagraphElement>("#contact-status");
 	const submit = document.querySelector<HTMLButtonElement>("#contact-submit");
 
+	/* Prefill from a known topic, e.g. /contact/?topic=piecewise-pilot. Only fixed templates
+	   are used, never free text from the URL. Fields the visitor already typed are kept. */
+	const PRESETS: Record<string, { subject: string; message: string }> = {
+		"piecewise-pilot": {
+			subject: "Piecewise free pilot",
+			message:
+				"Hi Ravi,\n\nI'd like to request a free Piecewise pilot.\n\nCompany / team: \nWhat we'd like an agent to handle: \nTools it would connect to (e.g. Gmail, Slack, a database): \nRough volume (runs per day or week): \n\nThanks!",
+		},
+	};
+	const preset = PRESETS[new URLSearchParams(location.search).get("topic") ?? ""];
+	if (preset) {
+		const subjectEl = document.querySelector<HTMLInputElement>("#subject");
+		const messageEl = document.querySelector<HTMLTextAreaElement>("#message");
+		if (subjectEl && !subjectEl.value) subjectEl.value = preset.subject;
+		if (messageEl && !messageEl.value) {
+			messageEl.value = preset.message;
+			messageEl.rows = 11;
+		}
+		document.querySelector<HTMLInputElement>("#name")?.focus();
+	}
+
 	if (form && status && submit) {
 		const label = submit.textContent ?? "Send message";
 
