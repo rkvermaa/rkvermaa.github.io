@@ -18,7 +18,6 @@ const links: { title: string; path: string }[] = [
 	...(projects.length > 0 ? [{ title: "Projects", path: "/projects/" }] : []),
 	...(writing.length > 0 ? [{ title: "Writing", path: "/writing/" }] : []),
 	...(books.length > 0 ? [{ title: "Books", path: "/books/" }] : []),
-	{ title: "Skills", path: "/skills/" },
 	{ title: "Play", path: "/play/" },
 	{ title: "Contact", path: "/contact/" },
 ];
@@ -41,12 +40,12 @@ const years =
 	<a class="signature" href={withBase("/")} aria-label={`${name}, home`}>Ravi Kumar Verma</a>
 	<p class="made">
 		Made with
-		<svg aria-label="love" role="img" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg>
+		<svg class="heart" aria-label="love" role="img" width="14" height="14" viewBox="0 0 24 24"><path d="M12 21s-8-5-8-11.2A4.6 4.6 0 0 1 12 6.6a4.6 4.6 0 0 1 8 3.2C20 16 12 21 12 21z" fill="#e0245e"></path></svg>
 		by {name}
 	</p>
 	<p class="bio">
-		{name} is an AI engineer and founder from Uttar Pradesh, India, building Piecewise and helping
-		teams ship AI agents and LLM features.
+		AI engineer from Kanpur, India. 14 years in tech, from telecom officer at BSNL to building AI
+		agents that work outside the demo.
 	</p>
 	<nav class="links" aria-label="Footer">
 		{links.map((item) => <a href={withBase(item.path)}>{item.title}</a>)}
@@ -103,6 +102,9 @@ const years =
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
+	}
+	.heart {
+		flex: none;
 	}
 	.bio {
 		margin: 4px 0 0;
