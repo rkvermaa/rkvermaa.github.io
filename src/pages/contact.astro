@@ -189,7 +189,7 @@ const telHref = profile?.phone ? `tel:${profile.phone.replace(/[^\d+]/g, "")}` :
 				const result = await response.json();
 
 				if (response.ok && result.success) {
-					status.textContent = "Message sent. I'll get back to you soon.";
+					status.textContent = "✓ Message sent. I'll get back to you soon.";
 					status.className = "status ok";
 					form.reset();
 				} else {
@@ -311,8 +311,13 @@ const telHref = profile?.phone ? `tel:${profile.phone.replace(/[^\d+]/g, "")}` :
 		margin: 14px 0 0;
 		min-height: 1.2em;
 	}
+	/* Success reads green (the accent is a red-orange, which looked like an error). */
 	.status.ok {
-		color: hsl(var(--theme-accent));
+		color: #0f7b5f;
+		font-weight: 500;
+	}
+	:global([data-theme="dark"]) .status.ok {
+		color: #4cc49a;
 	}
 	.status.err {
 		color: hsl(var(--aside-warning));
