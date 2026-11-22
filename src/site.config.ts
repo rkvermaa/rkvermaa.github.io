@@ -2,7 +2,7 @@ import type { MenuLink, SiteConfig } from "@/types";
 import type { AstroExpressiveCodeOptions } from "astro-expressive-code";
 
 export const siteConfig: SiteConfig = {
-	author: "Ravi Kumar Verma",
+	author: "Ravi K Verma",
 	date: {
 		locale: "en-US",
 		options: {
@@ -18,10 +18,10 @@ export const siteConfig: SiteConfig = {
 14+ years in tech, 8+ of them building AI and data systems for finance, telecom and energy.`,
 	lang: "en-US",
 	ogLocale: "en_US",
-	title: "Ravi Kumar Verma",
+	title: "Ravi K Verma",
 	hideThemeCredit: true,
 	profile: {
-		name: "Ravi Kumar Verma",
+		name: "Ravi K Verma",
 		tagline: "Full-Stack AI Engineer",
 		email: "rkverma87@gmail.com",
 		phone: "+91 74092 10692",

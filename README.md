@@ -1,6 +1,6 @@
 # rkvermaa.github.io
 
-Personal site for Ravi Kumar Verma — Full-Stack AI Engineer.
+Personal site for Ravi K Verma — Full-Stack AI Engineer.
 
 Built with [Astro](https://astro.build) on the [astro-sienna](https://github.com/anjay-goel/astro-sienna) theme (MIT). Deployed to GitHub Pages by GitHub Actions on every push to `main`.
 
@@ -89,4 +89,4 @@ git checkout theme/main -- src/pages/posts src/pages/tags src/pages/rss.xml.ts \
 ## Licence
 
 Theme: MIT © astro-sienna contributors — see `LICENSE`.
-Site content and copy: © Ravi Kumar Verma.
+Site content and copy: © Ravi K Verma.
