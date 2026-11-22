@@ -1,400 +1,743 @@
 ---
+import { books, coverFor } from "@/data/books";
 import { experience } from "@/data/experience";
-import { projects, stackLine } from "@/data/projects";
+import { life, now, tiles } from "@/data/home";
 import { writing } from "@/data/writing";
 import PageLayout from "@/layouts/Base.astro";
 import { siteConfig } from "@/site-config";
-import { formatDateRange, toDateTimeRange } from "@/utils/date";
 import { absoluteUrl, withBase } from "@/utils/path";
 import { Schema } from "astro-seo-schema";
 
 const profile = siteConfig.profile;
+const email = profile?.email ?? "rkverma87@gmail.com";
 const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 
 const recentRoles = experience.slice(0, 3);
-const featuredProjects = projects.filter((project) => project.featured).slice(0, 3);
 const recentWriting = writing.slice(0, 3);
+const shelf = books.slice(0, 5);
 
-/** Blank lines in `intro` separate paragraphs — render them as real <p>s so the
- *  spacing is controlled by CSS rather than a literal empty line. */
-const introParagraphs = (siteConfig.intro ?? siteConfig.description)
-	.split(/\n\s*\n/)
-	.map((para) => para.trim())
-	.filter(Boolean);
+const yearOf = (ym: string) => ym.slice(0, 4);
+const endYear = (end: string) => (end === "present" ? "Now" : yearOf(end));
+
+/** Internal "#anchor" and root-relative links get the base path; others pass through. */
+const link = (href: string) => (href.startsWith("#") ? href : withBase(href));
+const isExternal = (href: string) => /^https?:\/\//.test(href);
 ---
 
 <Schema
 	item={{
 		"@context": "https://schema.org",
-		"@type": "BreadcrumbList",
-		itemListElement: [
-			{
-				"@type": "ListItem",
-				position: 1,
-				name: "Home",
-				item: siteUrl("/"),
-			},
-			{
-				"@type": "ListItem",
-				position: 2,
-				name: "Experience",
-				item: siteUrl("/experience/"),
-			},
-			{
-				"@type": "ListItem",
-				position: 3,
-				name: "Projects",
-				item: siteUrl("/projects/"),
-			},
-		],
+		"@type": "Person",
+		name: profile?.name ?? siteConfig.author,
+		url: siteUrl("/"),
+		jobTitle: profile?.jobTitle,
+		email: profile?.email,
+		sameAs: [profile?.github, profile?.linkedin, profile?.medium].filter(
+			(u): u is string => typeof u === "string" && u.length > 0,
+		),
 	}}
 />
 
-<PageLayout meta={{ title: "Home", description: siteConfig.description }}>
-	<section class="hero">
-		<div class="hero-grid">
-			{profile?.avatar && (
-				<img
-					class="portrait"
-					src={withBase(profile.avatar)}
-					alt={profile.name ?? siteConfig.author}
-					width="640"
-					height="800"
-					decoding="async"
-				/>
-			)}
-			<div class="hero-text">
-		{introParagraphs.map((para) => <p>{para}</p>)}
-		<div class="socials">
-			{profile?.github && (
-				<>
-					<a href={profile.github} rel="noreferrer" target="_blank">GitHub</a>
-					<span class="sep">·</span>
-				</>
-			)}
-			{profile?.linkedin && (
-				<>
-					<a href={profile.linkedin} rel="noreferrer" target="_blank">LinkedIn</a>
-					<span class="sep">·</span>
-				</>
-			)}
-			{profile?.email && (
-				<>
-					<a href={`mailto:${profile.email}`}>Email</a>
-					<span class="sep">·</span>
-				</>
-			)}
-			{profile?.resume && (
-				<>
-					<a href={withBase(profile.resume)}>Résumé</a>
-					<span class="sep">·</span>
-				</>
-			)}
-			<a href={withBase("/contact/")} data-astro-prefetch>Contact</a>
-		</div>
-				<div class="more">
-					<a data-astro-prefetch href={withBase("/about/")}>More about me →</a>
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<section class="experience" aria-labelledby="experience-label">
-		<div class="section-label" id="experience-label">Experience</div>
-		<div class="timeline">
-			{
-				recentRoles.map((role, idx) => (
-					<div class="post role" style={`--i: ${idx}`}>
-						<div class="post-rail">
-							<time class="post-date" datetime={toDateTimeRange(role.start, role.end)}>
-								{formatDateRange(role.start, role.end)}
-							</time>
-							<span class="post-dot" aria-hidden="true" />
-						</div>
-						<div class="post-body">
-							<h2 class="post-title">
-								{role.role} <span class="at">at</span> {role.company}
-							</h2>
-							<div class="role-meta">{formatDateRange(role.start, role.end)}</div>
-							<p class="post-preview">{role.summary}</p>
-						</div>
-					</div>
-				))
-			}
-			<div class="archive-link" style={`--i: ${recentRoles.length}`}>
-				<a data-astro-prefetch href={withBase("/experience/")}>Full work history →</a>
-			</div>
-		</div>
-	</section>
-
-	{
-		featuredProjects.length > 0 && (
-			<section class="work" aria-labelledby="work-label">
-				<div class="section-label" id="work-label">Selected projects</div>
-				<ul class="work-list">
-					{featuredProjects.map((project, idx) => (
-						<li style={`--i: ${idx + 1}`}>
-							{project.href ? (
-								<a href={project.href} rel="noreferrer" target="_blank">
-									<div class="head">
-										<span class="name">{project.name}</span>
-										{project.badge && <span class="badge">{project.badge}</span>}
-									</div>
-									<div class="stack">{stackLine(project)}</div>
-									<p>{project.desc}</p>
+<PageLayout meta={{ title: "Home", description: siteConfig.description }} wide>
+	<section class="hero" aria-labelledby="now-h">
+		<p class="signature" aria-hidden="true">Ravi Verma</p>
+		<h1 class="visually-hidden">{profile?.name ?? siteConfig.author}</h1>
+		<div class="now">
+			<h2 class="label" id="now-h">/now</h2>
+			<ul>
+				{
+					now.map((item) => (
+						<li>
+							{item.before}{" "}
+							{item.href ? (
+								<a class="mark-link" href={link(item.href)} {...(isExternal(item.href) ? { rel: "noreferrer", target: "_blank" } : {})}>
+									<span class="mark" style={`background:${item.color}`} aria-hidden="true" />
+									{item.name}
 								</a>
 							) : (
-								<div class="entry">
-									<div class="head">
-										<span class="name">{project.name}</span>
-										{project.badge && <span class="badge">{project.badge}</span>}
-									</div>
-									<div class="stack">{stackLine(project)}</div>
-									<p>{project.desc}</p>
-								</div>
+								<strong class="mark-link">
+									<span class="mark" style={`background:${item.color}`} aria-hidden="true" />
+									{item.name}
+								</strong>
+							)}
+							{item.after}
+							{item.cta && (
+								<>
+									{" "}
+									<a class="cta-link" href={item.cta.href}>
+										{item.cta.label} ›
+									</a>
+								</>
 							)}
 						</li>
-					))}
-				</ul>
-				<p class="more">
-					<a data-astro-prefetch href={withBase("/projects/")}>
-						All {projects.length} projects →
-					</a>
-				</p>
-			</section>
-		)
-	}
+					))
+				}
+			</ul>
+		</div>
+	</section>
 
-	{
-		recentWriting.length > 0 && (
-			<section class="writing" aria-labelledby="writing-label">
-				<div class="section-label" id="writing-label">Writing</div>
-				<ul class="work-list">
-					{recentWriting.map((item, idx) => (
-						<li style={`--i: ${idx + 1}`}>
-							<a href={item.href} rel="noreferrer" target="_blank">
-								<div class="head">
-									<span class="name">{item.title}</span>
-									{item.source && <span class="stack">{item.source} ↗</span>}
+	<section class="life" aria-labelledby="life-h">
+		<h2 class="label" id="life-h">/life</h2>
+		<ul class="life-grid">
+			{
+				life.map((fact) => (
+					<li>
+						<svg
+							aria-hidden="true"
+							width="18"
+							height="18"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke={fact.color}
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							set:html={fact.icon}
+						/>
+						<div>
+							<span class="life-title">{fact.title}</span>
+							<span class="life-detail">{fact.detail}</span>
+						</div>
+					</li>
+				))
+			}
+		</ul>
+	</section>
+
+	<div class="board">
+		<div class="col">
+			<section aria-labelledby="proj-h">
+				<header class="card-head">
+					<h2 id="proj-h">
+						<a href={withBase("/projects/")} data-astro-prefetch>Projects ›</a>
+					</h2>
+					<p>Things I've built and am building</p>
+				</header>
+				<ul class="tiles">
+					{
+						tiles.map((tile) => {
+							const href = tile.href ? link(tile.href) : withBase("/projects/");
+							const external = tile.href ? isExternal(tile.href) : false;
+							return (
+								<li>
+									<a class="tile-link" href={href} {...(external ? { rel: "noreferrer", target: "_blank" } : {})}>
+										<span
+											class:list={["tile", { outline: tile.outline }]}
+											style={`background:${tile.bg};color:${tile.fg}`}
+											aria-hidden="true"
+										>
+											{tile.icon ? (
+												<svg
+													width="32"
+													height="32"
+													viewBox="0 0 24 24"
+													fill="none"
+													stroke="currentColor"
+													stroke-width="2"
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													set:html={tile.icon}
+												/>
+											) : (
+												<span class="tile-text">{tile.text}</span>
+											)}
+										</span>
+										<span class="tile-name">{tile.name}</span>
+									</a>
+								</li>
+							);
+						})
+					}
+				</ul>
+			</section>
+
+			{
+				recentWriting.length > 0 && (
+					<section aria-labelledby="writing-h">
+						<header class="card-head">
+							<h2 id="writing-h">
+								<a href={withBase("/writing/")} data-astro-prefetch>
+									Writing ›
+								</a>
+							</h2>
+							<p>Notes on building with AI</p>
+						</header>
+						<ul class="card list">
+							{recentWriting.map((item) => (
+								<li>
+									<a href={item.href} rel="noreferrer" target="_blank">
+										<span class="row-title">{item.title}</span>
+										<span class="row-detail">
+											{item.source}
+											{item.description ? ` · ${item.description}` : ""}
+										</span>
+									</a>
+								</li>
+							))}
+						</ul>
+					</section>
+				)
+			}
+
+			<section aria-labelledby="play-h">
+				<header class="card-head">
+					<h2 id="play-h">
+						<a href={withBase("/play/")} data-astro-prefetch>Play with me ›</a>
+					</h2>
+					<p>Three tiny games for a short break</p>
+				</header>
+				<ul class="card list">
+					<li>
+						<a href={withBase("/play/#ttt-h")}>
+							<span class="row-title">Tic-tac-toe</span>
+							<span class="row-detail">I never lose. Can you get a draw?</span>
+						</a>
+					</li>
+					<li>
+						<a href={withBase("/play/#mem-h")}>
+							<span class="row-title">Memory match</span>
+							<span class="row-detail">Find eight pairs of tech terms</span>
+						</a>
+					</li>
+					<li>
+						<a href={withBase("/play/#rx-h")}>
+							<span class="row-title">Reaction test</span>
+							<span class="row-detail">How fast are your fingers?</span>
+						</a>
+					</li>
+				</ul>
+			</section>
+
+			{
+				shelf.length > 0 && (
+					<section aria-labelledby="books-h">
+						<header class="card-head">
+							<h2 id="books-h">
+								<a href={withBase("/books/")} data-astro-prefetch>
+									Books ›
+								</a>
+							</h2>
+							<p>What I've been reading</p>
+						</header>
+						<ul class="shelf">
+							{shelf.map((book) => {
+								const cover = coverFor(book);
+								return (
+									<li title={`${book.title} by ${book.author}`}>
+										{cover ? (
+											<img src={cover} alt={`${book.title} by ${book.author}`} loading="lazy" width="80" height="120" />
+										) : (
+											<span class="book-fallback">{book.title}</span>
+										)}
+									</li>
+								);
+							})}
+						</ul>
+					</section>
+				)
+			}
+		</div>
+
+		<div class="col">
+			<section id="hire" class="hire" aria-labelledby="hire-h">
+				<h2 id="hire-h">Work with me</h2>
+				<p>
+					I help teams design and build AI agents, RAG systems and LLM features that hold up in
+					production. The first call is free.
+				</p>
+				<ul class="chips" aria-label="Areas">
+					<li>Multi-agent systems</li>
+					<li>RAG</li>
+					<li>LangGraph</li>
+					<li>Data platforms</li>
+				</ul>
+				<a class="button" href={`mailto:${email}`}>Book a 20-minute call</a>
+			</section>
+
+			<section id="piecewise" aria-labelledby="pw-h">
+				<header class="card-head">
+					<h2 id="pw-h">Piecewise ›</h2>
+					<p>AI agents on rails</p>
+				</header>
+				<div class="card pw">
+					<div class="pw-shot" role="img" aria-label="Piecewise app screenshot (coming soon)">
+						Screenshot coming soon
+					</div>
+					<div class="pw-body">
+						<p>
+							Agents run through workflows your team defines and approves, with your own skills,
+							connectors and LLM keys. It ships with a full SDLC workflow, and the flows are
+							deterministic, so cost per run is predictable.
+						</p>
+						<a class="cta-link" href={`mailto:${email}?subject=Piecewise%20pilot`}>
+							Request a free pilot ›
+						</a>
+					</div>
+				</div>
+			</section>
+
+			<section aria-labelledby="exp-h">
+				<header class="card-head">
+					<h2 id="exp-h">
+						<a href={withBase("/experience/")} data-astro-prefetch>Experience ›</a>
+					</h2>
+					<p>Where I've worked</p>
+				</header>
+				<ul class="roles">
+					{
+						recentRoles.map((role) => (
+							<li class="card role">
+								<div class="role-years">
+									<span>{yearOf(role.start)}</span>
+									<span class="role-end">{endYear(role.end)}</span>
 								</div>
-								{item.description && <p>{item.description}</p>}
+								<div>
+									<span class="row-title">{role.role}</span>
+									<span class="row-detail">{role.company}</span>
+								</div>
+							</li>
+						))
+					}
+				</ul>
+				<a class="more" href={withBase("/journey/")} data-astro-prefetch>
+					My whole journey ›
+				</a>
+			</section>
+
+			<section class="card hello" aria-labelledby="hello-h">
+				<h2 id="hello-h">Say hello</h2>
+				<ul>
+					<li><a href={`mailto:${email}`}>Email</a></li>
+					{profile?.linkedin && (
+						<li>
+							<a href={profile.linkedin} rel="noreferrer" target="_blank">
+								LinkedIn
 							</a>
 						</li>
-					))}
+					)}
+					{profile?.github && (
+						<li>
+							<a href={profile.github} rel="noreferrer" target="_blank">
+								GitHub
+							</a>
+						</li>
+					)}
+					{profile?.resume && (
+						<li>
+							<a href={withBase(profile.resume)}>Résumé</a>
+						</li>
+					)}
 				</ul>
-				<p class="more">
-					<a data-astro-prefetch href={withBase("/writing/")}>All writing →</a>
-				</p>
 			</section>
-		)
-	}
+		</div>
+	</div>
 </PageLayout>
 
 <style>
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+	.label {
+		margin: 0 0 18px;
+		font-family: var(--font-mono);
+		font-size: 12px;
+		font-weight: 400;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: hsl(var(--theme-text) / 0.62);
+	}
+
 	/* ---------- Hero ---------- */
 	.hero {
-		margin-bottom: 76px;
+		max-width: 620px;
+		margin: 24px auto 80px;
 	}
-	.hero-grid {
+	.signature {
+		margin: 0 0 56px;
+		text-align: center;
+		font-family: var(--font-signature);
+		font-size: 88px;
+		line-height: 1.1;
+		color: hsl(var(--theme-text));
+		transform: rotate(-6deg);
+	}
+	.now ul {
+		margin: 0;
+		padding-left: 18px;
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+		font-size: 16.5px;
+		line-height: 1.65;
+		color: hsl(var(--theme-text) / 0.88);
+	}
+	.mark-link {
+		font-weight: 600;
+		color: hsl(var(--theme-text));
+		white-space: nowrap;
+	}
+	.mark {
+		display: inline-block;
+		width: 14px;
+		height: 14px;
+		border-radius: 4px;
+		margin-right: 5px;
+		vertical-align: -2px;
+	}
+	a.mark-link:hover {
+		color: hsl(var(--theme-accent));
+	}
+	.cta-link {
+		font-weight: 500;
+		color: hsl(var(--theme-accent));
+	}
+	.cta-link:hover {
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+
+	/* ---------- Life ---------- */
+	.life {
+		margin-bottom: 72px;
+	}
+	.life-grid {
+		list-style: none;
+		margin: 0;
+		padding: 0;
 		display: grid;
-		grid-template-columns: 156px minmax(0, 1fr);
+		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+		gap: 24px 32px;
+	}
+	.life-grid li {
+		display: flex;
+		gap: 12px;
+		align-items: flex-start;
+	}
+	.life-grid svg {
+		flex: none;
+		margin-top: 4px;
+	}
+	.life-grid div {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+	.life-title {
+		font-size: 16px;
+	}
+	.life-detail {
+		font-size: 14px;
+		color: hsl(var(--theme-text) / 0.62);
+	}
+
+	/* ---------- Board ---------- */
+	.board {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 36px;
 		align-items: start;
+		margin-bottom: 96px;
 	}
-	/* 4:5 portrait; the 640×800 source stays crisp past 3× density. */
-	.portrait {
-		width: 156px;
-		height: 195px;
-		/* Drop by the paragraph's half-leading so the image's top edge lines up
-		   with the first line's letters, not its (taller) line box. */
-		margin-top: calc((1.65em - 1em) / 2);
-		font-size: 19.5px;
-		border-radius: 2px;
-		object-fit: cover;
-		background: var(--paper);
-		border: 1px solid var(--hairline);
-		transition: background-color 0.35s ease, border-color 0.35s ease;
-	}
-	.hero-text {
+	.col {
+		display: flex;
+		flex-direction: column;
+		gap: 36px;
 		min-width: 0;
 	}
-	.hero-text > p {
-		font-size: 19.5px;
-		line-height: 1.65;
-		color: hsl(var(--theme-text));
-		margin: 0 0 18px;
-		max-width: 60ch;
-		text-wrap: pretty;
+	.card-head {
+		margin-bottom: 12px;
 	}
-	.hero-text > p:last-of-type {
-		margin-bottom: 0;
+	.card-head h2 {
+		margin: 0;
+		font-size: 20px;
+		font-weight: 700;
 	}
-	.socials {
-		font-family: var(--font-sans);
-		font-size: 13.5px;
-		color: hsl(var(--theme-text) / 0.72);
-		margin-top: 18px;
-	}
-	.socials a {
-		color: hsl(var(--theme-text-muted));
-		text-decoration: underline;
-		text-decoration-color: hsl(var(--theme-text) / 0.35);
-		text-decoration-thickness: 1px;
-		text-underline-offset: 3px;
-		transition: color 0.2s ease, text-decoration-color 0.2s ease;
-	}
-	.socials a:hover {
+	.card-head h2 a:hover {
 		color: hsl(var(--theme-accent));
-		text-decoration-color: hsl(var(--theme-accent));
 	}
-	.socials .sep {
-		color: var(--faint);
-		margin: 0 9px;
+	.card-head p {
+		margin: 2px 0 0;
+		font-size: 14px;
+		color: hsl(var(--theme-text) / 0.62);
+	}
+	.card {
+		background: var(--paper);
+		border-radius: 16px;
+	}
+	.list {
+		list-style: none;
+		margin: 0;
+		padding: 6px 20px;
+	}
+	.list li + li {
+		border-top: 1px solid var(--hairline);
+	}
+	.list a {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		padding: 14px 0;
+	}
+	.list a:hover .row-title {
+		color: hsl(var(--theme-accent));
+	}
+	.row-title {
+		font-size: 15.5px;
+		font-weight: 600;
+	}
+	.row-detail {
+		font-size: 13.5px;
+		color: hsl(var(--theme-text) / 0.62);
 	}
 
-	/* ---------- Experience preview ---------- */
-	.experience {
-		margin-bottom: 84px;
+	/* Project tiles */
+	.tiles {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 18px 12px;
 	}
-	/* Date ranges need a wider rail than the theme's single-date default. */
-	.timeline {
-		--rail-width: 172px;
+	.tile-link {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 8px;
+		text-align: center;
 	}
-	.at {
-		color: hsl(var(--theme-text) / 0.55);
-		font-weight: 400;
+	.tile {
+		width: 72px;
+		height: 72px;
+		border-radius: 20px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: transform 0.2s ease;
 	}
-	.role-meta {
-		display: none;
+	.tile.outline {
+		box-shadow: inset 0 0 0 1px var(--hairline);
 	}
-	/* These rows aren't links, so suppress the timeline's clickable affordances. */
-	.timeline :global(.role:hover .post-title) {
-		color: hsl(var(--theme-text));
+	.tile-link:hover .tile {
+		transform: translateY(-2px);
 	}
-	.timeline :global(.role:hover .post-dot) {
+	.tile-text {
+		font-weight: 700;
+		font-size: 18px;
+	}
+	.tile-name {
+		font-size: 12.5px;
+		line-height: 1.3;
+		color: hsl(var(--theme-text) / 0.75);
+	}
+
+	/* Books */
+	.shelf {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		gap: 12px;
+		flex-wrap: wrap;
+	}
+	.shelf img,
+	.book-fallback {
+		width: 72px;
+		height: 108px;
+		object-fit: cover;
+		border-radius: 4px;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+		display: block;
+	}
+	.book-fallback {
+		background: var(--paper);
+		font-size: 10px;
+		line-height: 1.3;
+		padding: 8px;
+		box-sizing: border-box;
+		overflow: hidden;
+	}
+
+	/* Work with me */
+	.hire {
+		background: #1a1a1a;
+		color: #f2f2ef;
+		border-radius: 20px;
+		padding: 28px;
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+	}
+	:global([data-theme="dark"]) .hire {
+		background: #262624;
+	}
+	.hire h2 {
+		margin: 0;
+		font-size: 22px;
+		font-weight: 700;
+	}
+	.hire p {
+		margin: 0;
+		font-size: 15px;
+		line-height: 1.6;
+		color: #cfcfc9;
+	}
+	.chips {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+	.chips li {
+		font-size: 12.5px;
+		border: 1px solid #44443f;
+		border-radius: 999px;
+		padding: 5px 11px;
+		color: #e4e4de;
+	}
+	.button {
+		align-self: flex-start;
+		background: #e4572e;
+		color: #ffffff;
+		padding: 12px 20px;
+		border-radius: 12px;
+		font-weight: 600;
+		font-size: 15px;
+	}
+	.button:hover {
+		background: #c9461f;
+		color: #ffffff;
+	}
+
+	/* Piecewise */
+	.pw {
+		overflow: hidden;
+	}
+	.pw-shot {
+		aspect-ratio: 16 / 9;
 		background: hsl(var(--theme-bg));
-		border-color: var(--faint);
-		box-shadow: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-family: var(--font-mono);
+		font-size: 13px;
+		color: hsl(var(--theme-text) / 0.6);
 	}
-	.timeline :global(.role:hover .post-date) {
-		color: hsl(var(--theme-text) / 0.72);
+	.pw-body {
+		padding: 18px 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
 	}
-	.timeline :global(.role:active) {
-		transform: none;
-		opacity: 1;
-	}
-	.timeline :global(.role .post-preview) {
-		-webkit-line-clamp: 2;
-	}
-
-	.archive-link {
-		grid-column: 2;
-		margin-top: 8px;
-		font-family: var(--font-sans);
-		font-size: 13.5px;
-		color: hsl(var(--theme-text) / 0.72);
-	}
-	.archive-link a,
-	.more a {
-		display: inline-block;
-		padding: 6px 0;
-		color: hsl(var(--theme-text-muted));
-		text-decoration: underline;
-		text-decoration-color: hsl(var(--theme-text) / 0.35);
-		text-decoration-thickness: 1px;
-		text-underline-offset: 3px;
-		transition: color 0.2s ease, text-decoration-color 0.2s ease;
-	}
-	.archive-link a:hover,
-	.more a:hover {
-		color: hsl(var(--theme-accent));
-		text-decoration-color: hsl(var(--theme-accent));
+	.pw-body p {
+		margin: 0;
+		font-size: 14.5px;
+		line-height: 1.6;
+		color: hsl(var(--theme-text) / 0.8);
 	}
 
-	.work,
-	.writing {
-		margin-bottom: 88px;
+	/* Experience */
+	.roles {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
 	}
-	.work :global(ul.work-list .entry) {
-		display: block;
+	.role {
+		padding: 14px 18px;
+		display: flex;
+		gap: 16px;
+		align-items: center;
 	}
-	/* Long project names make name + stack + badge wrap unpredictably on one
-	   line, so the stack gets its own. */
-	.work :global(ul.work-list .head) {
-		margin-bottom: 4px;
+	.role > div:last-child {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		min-width: 0;
 	}
-	.work :global(ul.work-list .stack) {
-		display: block;
-	}
-	.work :global(ul.work-list .badge) {
+	.role-years {
+		width: 52px;
 		flex: none;
+		display: flex;
+		flex-direction: column;
+		text-align: center;
+		font-size: 19px;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+	}
+	.role-end {
+		font-size: 11.5px;
+		font-weight: 600;
+		color: hsl(var(--theme-accent));
 	}
 	.more {
-		margin: 14px 0 0;
-		font-family: var(--font-sans);
-		font-size: 13.5px;
+		display: inline-block;
+		margin-top: 12px;
+		font-size: 14px;
+		font-weight: 600;
+	}
+	.more:hover {
+		color: hsl(var(--theme-accent));
 	}
 
-	.socials a:focus-visible,
-	.archive-link a:focus-visible,
-	.more a:focus-visible {
+	/* Say hello */
+	.hello {
+		padding: 22px;
+	}
+	.hello h2 {
+		margin: 0 0 12px;
+		font-size: 18px;
+		font-weight: 700;
+	}
+	.hello ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+	}
+	.hello a {
+		display: inline-block;
+		font-size: 14px;
+		padding: 10px 14px;
+		border-radius: 10px;
+		background: hsl(var(--theme-bg));
+	}
+	.hello a:hover {
+		color: hsl(var(--theme-accent));
+	}
+
+	a:focus-visible {
 		outline: 2px solid hsl(var(--theme-accent));
 		outline-offset: 3px;
-		border-radius: 3px;
+		border-radius: 4px;
 	}
 
-	@media (max-width: 720px) {
-		.hero {
-			margin-bottom: 56px;
-		}
-		/* Two columns leave too little room for the text at phone widths. */
-		.hero-grid {
-			grid-template-columns: 1fr;
-			gap: 22px;
-			justify-items: start;
-		}
-		.portrait {
-			width: 120px;
-			height: 150px;
-		}
-		.hero-text > p {
-			font-size: 18px;
-		}
-		.role-meta {
-			display: block;
-			font-family: var(--font-mono);
-			font-size: 11.5px;
-			color: hsl(var(--theme-text) / 0.6);
-			margin-bottom: 8px;
-			font-variant-numeric: tabular-nums;
-		}
-		.timeline :global(.role .post-rail) {
-			display: none;
-		}
-		.archive-link {
-			margin-top: 0;
+	@media (max-width: 860px) {
+		.board {
+			grid-template-columns: minmax(0, 1fr);
 		}
 	}
-
-	@media (max-width: 420px) {
-		.hero {
-			margin-bottom: 48px;
+	@media (max-width: 520px) {
+		.signature {
+			font-size: 64px;
+			margin-bottom: 40px;
 		}
-		.hero-text > p {
-			font-size: 17px;
-		}
-		.socials {
-			font-size: 12.5px;
-		}
-		.socials .sep {
-			margin: 0 6px;
-		}
-		.experience {
-			margin-bottom: 64px;
-		}
-		.work,
-		.writing {
-			margin-bottom: 56px;
+		.tiles {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
 	}
 </style>

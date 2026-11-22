@@ -9,10 +9,13 @@ import type { SiteMeta } from "@/types";
 
 interface Props {
 	meta: SiteMeta;
+	/** Widen the page column (home page dashboard layout). */
+	wide?: boolean;
 }
 
 const {
 	meta: { articleDate, description = siteConfig.description, ogImage, title },
+	wide = false,
 } = Astro.props;
 ---
 
@@ -23,7 +26,7 @@ const {
 	</head>
 	<body>
 		<SkipLink />
-		<div class="wrap">
+		<div class:list={["wrap", { wide }]}>
 			<Header />
 			<main id="main">
 				<slot />
@@ -44,8 +47,8 @@ const {
 			body {
 				background-color: hsl(var(--theme-bg));
 				color: hsl(var(--theme-text));
-				font-family: var(--font-serif);
-				font-size: 18px;
+				font-family: var(--font-sans);
+				font-size: 17px;
 				line-height: 1.62;
 				font-weight: 400;
 				-webkit-font-smoothing: antialiased;
@@ -75,6 +78,9 @@ const {
 				flex-direction: column;
 			}
 			.wrap > main { flex: 1 0 auto; }
+			.wrap.wide {
+				max-width: 1064px;
+			}
 
 			@media (max-width: 720px) {
 				.wrap {

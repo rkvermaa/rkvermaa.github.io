@@ -1,0 +1,96 @@
+---
+import { books, coverFor } from "@/data/books";
+import PageLayout from "@/layouts/Base.astro";
+import { absoluteUrl } from "@/utils/path";
+import { Schema } from "astro-seo-schema";
+
+const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
+---
+
+<Schema
+	item={{
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: [
+			{ "@type": "ListItem", position: 1, name: "Home", item: siteUrl("/") },
+			{ "@type": "ListItem", position: 2, name: "Books", item: siteUrl("/books/") },
+		],
+	}}
+/>
+
+<PageLayout meta={{ title: "Books", description: "Books I've read, most recent first." }}>
+	<section aria-labelledby="books-label">
+		<div class="section-label" id="books-label">Books</div>
+		{
+			books.length === 0 ? (
+				<p class="intro">The shelf is being stocked. Check back soon.</p>
+			) : (
+				<>
+					<p class="intro">Books I've read, most recent first.</p>
+					<ul class="grid">
+						{books.map((book) => {
+							const cover = coverFor(book);
+							return (
+								<li>
+									{cover ? (
+										<img src={cover} alt="" loading="lazy" width="120" height="180" />
+									) : (
+										<span class="fallback" aria-hidden="true" />
+									)}
+									<span class="title">{book.title}</span>
+									<span class="author">
+										{book.author}
+										{book.year ? ` · ${book.year}` : ""}
+									</span>
+								</li>
+							);
+						})}
+					</ul>
+				</>
+			)
+		}
+	</section>
+</PageLayout>
+
+<style>
+	.intro {
+		font-size: 17px;
+		line-height: 1.6;
+		color: hsl(var(--theme-text) / 0.78);
+		margin: 0 0 32px;
+	}
+	.grid {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+		gap: 28px 20px;
+	}
+	.grid li {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	.grid img,
+	.fallback {
+		width: 100%;
+		aspect-ratio: 2 / 3;
+		height: auto;
+		object-fit: cover;
+		border-radius: 4px;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+		background: var(--paper);
+		margin-bottom: 6px;
+		display: block;
+	}
+	.title {
+		font-size: 14.5px;
+		font-weight: 600;
+		line-height: 1.35;
+	}
+	.author {
+		font-size: 13px;
+		color: hsl(var(--theme-text) / 0.62);
+	}
+</style>

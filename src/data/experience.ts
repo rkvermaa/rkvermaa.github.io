@@ -21,9 +21,9 @@ export const experience: ExperienceItem[] = [
 		role: "Lead Data Scientist",
 		location: "Jaipur, India",
 		start: "2025-08",
-		end: "present",
+		end: "2025-12",
 		summary:
-			"Architecting and deploying enterprise-scale data infrastructure and intelligent ML systems, currently building UPCL smart meter analytics that processes terabytes of data from more than 600,000 meters.",
+			"Architected and deployed enterprise-scale data infrastructure and intelligent ML systems, building UPCL smart meter analytics that processes terabytes of data from more than 600,000 meters.",
 		highlights: [
 			"Redesigned the data architecture from a failing PostgreSQL setup into a scalable lakehouse on MinIO, Dremio and ClickHouse.",
 			"Built ML models for energy forecasting and tampering detection across the meter fleet.",

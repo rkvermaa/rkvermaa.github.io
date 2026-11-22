@@ -1,9 +1,9 @@
 ---
 title: About
-description: Ravi Kumar Verma — Full-Stack AI Engineer building GenAI systems, multi-agent workflows and large-scale data platforms.
+description: Ravi Kumar Verma — AI engineer and founder of Piecewise, building GenAI systems, multi-agent workflows and large-scale data platforms.
 ---
 
-I'm a Full-Stack AI Engineer who builds scalable data infrastructure and the intelligent systems that sit on top of it. At Passageway I architect enterprise-scale solutions that process terabytes of smart meter data, turning raw readings into something a utility can actually act on.
+I'm an AI engineer who builds scalable data infrastructure and the intelligent systems that sit on top of it. These days I'm building Piecewise, a platform for running AI agents through structured, cost-controlled workflows, and helping teams ship agents, RAG systems and LLM features as a consultant.
 
 Most of my work lives at the seam between two things that are usually kept apart: large language models and large-scale data. Designing a lakehouse, training an anomaly detector, wiring up a RAG system with multi-agent workflows — they're the same problem wearing different clothes, which is getting a messy real-world process to behave predictably.
 
