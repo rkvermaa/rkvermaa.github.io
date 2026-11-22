@@ -3,9 +3,9 @@ import BaseHead from "@/components/BaseHead.astro";
 import SkipLink from "@/components/SkipLink.astro";
 import ThemeProvider from "@/components/ThemeProvider.astro";
 import Footer from "@/components/layout/Footer.astro";
-import Header from "@/components/layout/Header.astro";
 import { siteConfig } from "@/site-config";
 import type { SiteMeta } from "@/types";
+import { withBase } from "@/utils/path";
 
 interface Props {
 	meta: SiteMeta;
@@ -17,6 +17,9 @@ const {
 	meta: { articleDate, description = siteConfig.description, ogImage, title },
 	wide = false,
 } = Astro.props;
+
+/** No nav bar (like anandchowdhary.com): inner pages get the signature as a home link instead. */
+const isHome = Astro.url.pathname === withBase("/");
 ---
 
 <html class="scroll-smooth" lang={siteConfig.lang}>
@@ -27,7 +30,15 @@ const {
 	<body>
 		<SkipLink />
 		<div class:list={["wrap", { wide }]}>
-			<Header />
+			{
+				!isHome && (
+					<header class="page-top">
+						<a class="home-sig" href={withBase("/")} aria-label="Home">
+							Ravi Kumar Verma
+						</a>
+					</header>
+				)
+			}
 			<main id="main">
 				<slot />
 			</main>
@@ -78,6 +89,21 @@ const {
 				flex-direction: column;
 			}
 			.wrap > main { flex: 1 0 auto; }
+			.page-top {
+				display: flex;
+				justify-content: center;
+				margin: 8px 0 56px;
+			}
+			.home-sig {
+				font-family: var(--font-signature);
+				font-size: 40px;
+				line-height: 1.2;
+				transform: rotate(-6deg);
+				padding: 0 12px;
+			}
+			.home-sig:hover {
+				color: hsl(var(--theme-accent));
+			}
 			.wrap.wide {
 				max-width: 1064px;
 			}

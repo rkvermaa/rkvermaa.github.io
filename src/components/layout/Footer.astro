@@ -5,12 +5,14 @@ import { projects } from "@/data/projects";
 import { writing } from "@/data/writing";
 import { siteConfig } from "@/site-config";
 import { withBase } from "@/utils/path";
+import ThemeToggle from "../ThemeToggle.astro";
 
 const name = siteConfig.profile?.name ?? siteConfig.author;
 
 const links: { title: string; path: string }[] = [
 	{ title: "Home", path: "/" },
 	{ title: "About", path: "/about/" },
+	{ title: "Life", path: "/life/" },
 	{ title: "Journey", path: "/journey/" },
 	{ title: "Experience", path: "/experience/" },
 	...(projects.length > 0 ? [{ title: "Projects", path: "/projects/" }] : []),
@@ -21,13 +23,22 @@ const links: { title: string; path: string }[] = [
 	{ title: "Contact", path: "/contact/" },
 ];
 
-/** Oldest first, so the row reads left to right like a timeline. */
-const years = journey.map((entry) => entry.year).sort((a, b) => a - b);
+/**
+ * Every year from the first journey entry to now, oldest first, so the row reads like a
+ * timeline. Years with a journey entry link to it; the others are shown dimmed.
+ */
+const journeyYears = new Set(journey.map((entry) => entry.year));
+const firstYear = Math.min(...journeyYears);
+const thisYear = new Date().getFullYear();
+const years =
+	journeyYears.size > 0
+		? Array.from({ length: thisYear - firstYear + 1 }, (_, i) => firstYear + i)
+		: [];
 ---
 
 <footer class="site-footer">
 	<span class="line" aria-hidden="true"></span>
-	<a class="signature" href={withBase("/")} aria-label={`${name}, home`}>Ravi Verma</a>
+	<a class="signature" href={withBase("/")} aria-label={`${name}, home`}>Ravi Kumar Verma</a>
 	<p class="made">
 		Made with
 		<svg aria-label="love" role="img" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg>
@@ -43,12 +54,19 @@ const years = journey.map((entry) => entry.year).sort((a, b) => a - b);
 	{
 		years.length > 0 && (
 			<nav class="years" aria-label="Journey by year">
-				{years.map((year) => (
-					<a href={withBase(`/journey/#y${year}`)}>{year}</a>
-				))}
+				{years.map((year) =>
+					journeyYears.has(year) ? (
+						<a href={withBase(`/journey/#y${year}`)}>{year}</a>
+					) : (
+						<span class="quiet-year">{year}</span>
+					),
+				)}
 			</nav>
 		)
 	}
+	<div class="theme">
+		<ThemeToggle />
+	</div>
 </footer>
 
 <style>
@@ -105,8 +123,16 @@ const years = journey.map((entry) => entry.year).sort((a, b) => a - b);
 	}
 	.years {
 		margin-top: 6px;
+		max-width: 960px;
+		gap: 6px 12px;
 		font-size: 13.5px;
 		font-variant-numeric: tabular-nums;
+	}
+	.theme {
+		margin-top: 10px;
+	}
+	.quiet-year {
+		color: hsl(var(--theme-text) / 0.35);
 	}
 	.site-footer a {
 		color: hsl(var(--theme-text));
