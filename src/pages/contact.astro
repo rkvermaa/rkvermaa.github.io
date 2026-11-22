@@ -1,7 +1,7 @@
 ---
 import PageLayout from "@/layouts/Base.astro";
 import { siteConfig } from "@/site-config";
-import { absoluteUrl, withBase } from "@/utils/path";
+import { absoluteUrl } from "@/utils/path";
 import { Schema } from "astro-seo-schema";
 
 const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
@@ -149,16 +149,6 @@ const telHref = profile?.phone ? `tel:${profile.phone.replace(/[^\d+]/g, "")}` :
 							</div>
 						)
 					}
-					{
-						profile?.resume && (
-							<div>
-								<dt>Résumé</dt>
-								<dd>
-									<a href={withBase(profile.resume)}>Download PDF</a>
-								</dd>
-							</div>
-						)
-					}
 				</dl>
 			</aside>
 		</div>
@@ -189,17 +179,17 @@ const telHref = profile?.phone ? `tel:${profile.phone.replace(/[^\d+]/g, "")}` :
 				const result = await response.json();
 
 				if (response.ok && result.success) {
-					status.textContent = "Message sent. I'll get back to you soon.";
+					status.textContent = "✓ Message sent. I'll get back to you soon.";
 					status.className = "status ok";
 					form.reset();
 				} else {
 					status.textContent =
-						"That didn't send. Please email me directly at rkverma87@gmail.com.";
+						"That didn't send. Please email me directly at contact@ravikverma.com.";
 					status.className = "status err";
 				}
 			} catch {
 				status.textContent =
-					"That didn't send — check your connection, or email me at rkverma87@gmail.com.";
+					"That didn't send — check your connection, or email me at contact@ravikverma.com.";
 				status.className = "status err";
 			} finally {
 				submit.disabled = false;
@@ -311,8 +301,13 @@ const telHref = profile?.phone ? `tel:${profile.phone.replace(/[^\d+]/g, "")}` :
 		margin: 14px 0 0;
 		min-height: 1.2em;
 	}
+	/* Success reads green (the accent is a red-orange, which looked like an error). */
 	.status.ok {
-		color: hsl(var(--theme-accent));
+		color: #0f7b5f;
+		font-weight: 500;
+	}
+	:global([data-theme="dark"]) .status.ok {
+		color: #4cc49a;
 	}
 	.status.err {
 		color: hsl(var(--aside-warning));

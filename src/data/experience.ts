@@ -4,6 +4,8 @@ export interface ExperienceItem {
 	companyUrl?: string;
 	role: string;
 	location: string;
+	/** Work-from-home role: shown with a small home icon. */
+	remote?: boolean;
 	/** `YYYY-MM` — sortable; formatted at render by `formatDateRange`. */
 	start: string;
 	/** `YYYY-MM`, or the literal `"present"`. */
@@ -20,11 +22,12 @@ export const experience: ExperienceItem[] = [
 		company: "Bounteous",
 		companyUrl: "https://www.bounteous.com",
 		role: "Associate Manager, Data Science",
-		// TODO(Ravi): confirm location and add a summary + highlights.
-		location: "India",
+		location: "Work from home",
+		remote: true,
 		start: "2025-12",
 		end: "present",
-		summary: "Associate Manager in the data science team.",
+		summary: "Multi-agentic automation.",
+		tech: ["Python", "Claude Agent SDK", "LangGraph", "Temporal"],
 	},
 	{
 		company: "Passageway",
@@ -43,7 +46,8 @@ export const experience: ExperienceItem[] = [
 	{
 		company: "Xaigi Technology",
 		role: "Project Lead · GenAI Solution Architect",
-		location: "Noida, India",
+		location: "Work from home",
+		remote: true,
 		start: "2024-01",
 		end: "2025-08",
 		summary:
@@ -85,7 +89,7 @@ export const experience: ExperienceItem[] = [
 	{
 		company: "Bharat Sanchar Nigam Limited",
 		role: "Junior Telecom Officer (JTO)",
-		location: "Gujarat, India",
+		location: "Jamnagar, Gujarat",
 		start: "2010-05",
 		end: "2016-06",
 		summary:

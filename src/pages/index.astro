@@ -1,7 +1,9 @@
 ---
 import { books, coverFor } from "@/data/books";
 import { experience } from "@/data/experience";
+import WorkplaceIcon from "@/components/WorkplaceIcon.astro";
 import { education } from "@/data/education";
+import ProjectOverlays from "@/components/ProjectOverlays.astro";
 import { life, now, tiles } from "@/data/home";
 import { timeline } from "@/data/timeline";
 import { writing } from "@/data/writing";
@@ -11,7 +13,7 @@ import { absoluteUrl, withBase } from "@/utils/path";
 import { Schema } from "astro-seo-schema";
 
 const profile = siteConfig.profile;
-const email = profile?.email ?? "rkverma87@gmail.com";
+const email = profile?.email ?? "contact@ravikverma.com";
 const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
 
 const recentRoles = experience.slice(0, 3);
@@ -242,7 +244,10 @@ const games = [
 				{
 					recentRoles.map((role) => (
 						<li>
-							<span class="item-title">{role.role}<span class="item-sub"> · {role.company}</span></span>
+							<span class="item-title">
+								{role.role}{" "}<WorkplaceIcon remote={role.remote} size={12} />
+								<span class="item-sub"> · {role.company}</span>
+							</span>
 							<span class="item-detail">{roleDates(role.start, role.end)}</span>
 						</li>
 					))
@@ -273,11 +278,21 @@ const games = [
 			<ul class="tiles soft-card">
 				{
 					tiles.map((tile) => {
-						const href = tile.href ? link(tile.href) : withBase("/projects/");
-						const external = tile.href ? isExternal(tile.href) : false;
+						const href = tile.project
+							? `#project-${tile.project}`
+							: tile.href
+								? link(tile.href)
+								: withBase("/projects/");
+						const external = !tile.project && tile.href ? isExternal(tile.href) : false;
 						return (
 							<li>
-								<a class="tile-link" href={href} title={tile.name} {...(external ? { rel: "noreferrer", target: "_blank" } : {})}>
+								<a
+									class="tile-link"
+									href={href}
+									title={tile.name}
+									data-project={tile.project}
+									{...(external ? { rel: "noreferrer", target: "_blank" } : {})}
+								>
 									<span
 										class:list={["tile", { outline: tile.outline }]}
 										style={`background:${tile.bg};color:${tile.fg}`}
@@ -472,12 +487,13 @@ const games = [
 					<li>RAG</li>
 				</ul>
 				<div class="hire-actions">
-					<a class="button" href={`mailto:${email}?subject=Let%27s%20talk`}>Book a 20-minute call</a>
+					<a class="button" href={withBase("/book/")}>Book a 20-minute call</a>
 					<a class="hire-email" href={`mailto:${email}`}>or email me</a>
 				</div>
 			</div>
 		</section>
 	</div>
+	<ProjectOverlays only={tiles.flatMap((t) => (t.project ? [t.project] : []))} />
 </PageLayout>
 
 <script>

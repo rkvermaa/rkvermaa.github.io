@@ -28,7 +28,7 @@ export const now: NowItem[] = [
 		after:
 			": agentic workflows, multi-agent systems, agent harnesses, skills, MCP integrations and RAG.",
 		color: "#b83f1a",
-		cta: { label: "Book a call", href: "mailto:rkverma87@gmail.com" },
+		cta: { label: "Book a call", href: "/book/" },
 	},
 	{
 		before: "Creating a full AI-ML course on",
@@ -41,6 +41,8 @@ export const now: NowItem[] = [
 
 export interface Tile {
 	name: string;
+	/** Slug in projects.ts: the tile opens that project's overlay instead of a link. */
+	project?: string;
 	href?: string;
 	/** Tile background. */
 	bg: string;
@@ -57,20 +59,22 @@ export interface Tile {
 export const tiles: Tile[] = [
 	{
 		name: "Piecewise",
-		href: "#piecewise",
+		project: "piecewise",
 		bg: "#1a1a1a",
 		fg: "#f2f2ef",
 		icon: '<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/><path d="M11 7h4a2 2 0 0 1 2 2v4"/>',
 	},
-	{ name: "PCSadda", href: "https://pcsadda.com", bg: "#e4572e", fg: "#ffffff", text: "PCS" },
+	{ name: "PCSadda", project: "pcsadda", bg: "#e4572e", fg: "#ffffff", text: "PCS" },
 	{
 		name: "UPCL Analytics",
+		project: "upcl-analytics",
 		bg: "#0f7b5f",
 		fg: "#ffffff",
 		icon: '<path d="M4 18V8M10 18V4M16 18v-6M22 18H2"/>',
 	},
 	{
 		name: "Finance AI Agents",
+		project: "finance-ai",
 		bg: "#2e6be6",
 		fg: "#ffffff",
 		icon: '<path d="M4 5h16v10H8l-4 4z"/>',
@@ -84,6 +88,7 @@ export const tiles: Tile[] = [
 	},
 	{
 		name: "Merchant Onboarding",
+		project: "merchant-onboarding",
 		bg: "#7a4fd6",
 		fg: "#ffffff",
 		icon: '<path d="M5 12h14M12 5l7 7-7 7"/>',
