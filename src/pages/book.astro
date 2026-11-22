@@ -1,9 +1,11 @@
 ---
 import PageLayout from "@/layouts/Base.astro";
+import { siteConfig } from "@/site-config";
 import { absoluteUrl } from "@/utils/path";
 import { Schema } from "astro-seo-schema";
 
 const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
+const email = siteConfig.profile?.email ?? "rkverma87@gmail.com";
 
 /**
  * Booking API: a Google Apps Script web app in Ravi's Google account (see scripts/booking-apps-script/).
@@ -29,6 +31,7 @@ const BOOKING_API =
 		title: "Book a call",
 		description: "Book a free 20-minute call with Ravi Kumar Verma about AI agents, RAG or automation.",
 	}}
+	wide
 >
 	<section class="book" aria-labelledby="book-h" data-api={BOOKING_API}>
 		<h1 class="label" id="book-h">/book-a-call</h1>
@@ -37,6 +40,7 @@ const BOOKING_API =
 			invite by email.
 		</p>
 
+		<div class="layout">
 		<div class="card">
 			<!-- Step 1: region + day + time -->
 			<div class="step" data-step="pick">
@@ -92,6 +96,41 @@ const BOOKING_API =
 				<p class="done-text" data-done-text></p>
 				<p class="done-sub">A Google Meet invite is on its way to your email. See you then.</p>
 			</div>
+		</div>
+
+		<aside class="info" aria-label="About the call">
+			<section aria-labelledby="how-h">
+				<h2 class="label" id="how-h">/how-it-works</h2>
+				<ol class="steps">
+					<li><span class="num">1</span><span>Choose your region, a day and a time. Slots are shown in your local time.</span></li>
+					<li><span class="num">2</span><span>Add your name, email and a line about what you're building.</span></li>
+					<li><span class="num">3</span><span>A Google Meet invite lands in your inbox straight away.</span></li>
+					<li><span class="num">4</span><span>We talk for 20 minutes, and you leave with clear next steps.</span></li>
+				</ol>
+			</section>
+
+			<section aria-labelledby="why-h">
+				<h2 class="label" id="why-h">/what-you-get</h2>
+				<ul class="dots">
+					<li>An honest view on whether an AI agent, RAG or automation is the right fit for your problem, or not.</li>
+					<li>A rough approach: architecture, tools and the risks to plan for.</li>
+					<li>Next steps you can act on, whether or not we work together.</li>
+					<li>Advice from 14 years in tech, from telecom to AI agents running in production.</li>
+				</ul>
+			</section>
+
+			<section aria-labelledby="change-h">
+				<h2 class="label" id="change-h">/if-plans-change</h2>
+				<ul class="dots">
+					<li>Need to move it? Reschedule or cancel anytime from the calendar invite.</li>
+					<li>If something comes up on my side, I'll email you as early as I can with new times, and you can pick whichever suits you.</li>
+					<li>
+						Can't find a time that works? <a href={`mailto:${email}?subject=Call%20request`}>Email me</a> and we'll
+						sort one out.
+					</li>
+				</ul>
+			</section>
+		</aside>
 		</div>
 	</section>
 </PageLayout>
@@ -356,6 +395,79 @@ const BOOKING_API =
 		font-size: 16px;
 		line-height: 1.6;
 		color: hsl(var(--theme-text) / 0.85);
+	}
+	/* Booking card on the left, "how it works / what you get" on the right. */
+	.layout {
+		display: grid;
+		grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+		gap: 48px;
+		align-items: start;
+	}
+	.info {
+		display: flex;
+		flex-direction: column;
+		gap: 34px;
+		padding-top: 4px;
+	}
+	.info .label {
+		margin-bottom: 14px;
+	}
+	.steps {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+	.steps li {
+		display: flex;
+		gap: 12px;
+		align-items: flex-start;
+		font-size: 14.5px;
+		line-height: 1.5;
+		color: hsl(var(--theme-text) / 0.85);
+	}
+	.num {
+		flex: none;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		background: #e4572e;
+		color: #ffffff;
+		font-size: 12.5px;
+		font-weight: 700;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.info .dots {
+		margin: 0;
+		padding-left: 16px;
+		list-style: disc;
+		display: flex;
+		flex-direction: column;
+		gap: 9px;
+	}
+	.info .dots li {
+		display: list-item;
+		padding-left: 2px;
+		font-size: 14.5px;
+		line-height: 1.5;
+		color: hsl(var(--theme-text) / 0.85);
+	}
+	.info .dots li::marker {
+		color: hsl(var(--theme-text) / 0.35);
+	}
+	.info a {
+		color: hsl(var(--theme-accent));
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+	@media (max-width: 860px) {
+		.layout {
+			grid-template-columns: minmax(0, 1fr);
+		}
 	}
 	/* Same soft paper card as the home page. */
 	.card {
