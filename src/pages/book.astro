@@ -1,11 +1,9 @@
 ---
 import PageLayout from "@/layouts/Base.astro";
-import { siteConfig } from "@/site-config";
-import { absoluteUrl } from "@/utils/path";
+import { absoluteUrl, withBase } from "@/utils/path";
 import { Schema } from "astro-seo-schema";
 
 const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
-const email = siteConfig.profile?.email ?? "contact@ravikverma.com";
 
 /**
  * Booking API: a Google Apps Script web app in Ravi's Google account (see scripts/booking-apps-script/).
@@ -125,7 +123,7 @@ const BOOKING_API =
 					<li>Need to move it? Reschedule or cancel anytime from the calendar invite.</li>
 					<li>If something comes up on my side, I'll email you as early as I can with new times, and you can pick whichever suits you.</li>
 					<li>
-						Can't find a time that works? <a href={`mailto:${email}?subject=Call%20request`}>Email me</a> and we'll
+						Can't find a time that works? <a href={withBase("/contact/?topic=call")}>Message me</a> and we'll
 						sort one out.
 					</li>
 				</ul>
@@ -234,7 +232,7 @@ const BOOKING_API =
 		timesEl.innerHTML = "";
 		timesLabel.hidden = true;
 		if (byDay.size === 0) {
-			daysEl.innerHTML = `<span class="muted">No free times for this region in the next 3 weeks. Please email instead.</span>`;
+			daysEl.innerHTML = `<span class="muted">No free times for this region in the next 3 weeks. Please use the contact page instead.</span>`;
 			return;
 		}
 		if (!chosenDay || !byDay.has(chosenDay)) chosenDay = byDay.keys().next().value!;
@@ -363,7 +361,7 @@ const BOOKING_API =
 			slots = (json.slots as string[]).map((s) => new Date(s));
 			render();
 		} catch {
-			daysEl.innerHTML = `<span class="muted">Couldn't load available times. Please refresh, or email instead.</span>`;
+			daysEl.innerHTML = `<span class="muted">Couldn't load available times. Please refresh, or use the contact page.</span>`;
 		}
 	}
 
