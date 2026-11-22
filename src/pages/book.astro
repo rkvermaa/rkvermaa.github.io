@@ -71,6 +71,9 @@ const BOOKING_API =
 
 				<label class="field-label" for="b-email">Email</label>
 				<input id="b-email" name="email" type="email" autocomplete="email" required maxlength="200" />
+				<p class="suggest" data-suggest hidden>
+					Did you mean <button type="button" class="link-btn" data-suggest-btn></button>?
+				</p>
 
 				<label class="field-label" for="b-topic">What would you like to discuss?</label>
 				<textarea id="b-topic" name="topic" rows="4" required maxlength="1500"
@@ -225,12 +228,43 @@ const BOOKING_API =
 
 	function choose(s: Date) {
 		chosen = s;
-		$("[data-chosen]").textContent = `${fmt(s, { weekday: "long", day: "numeric", month: "long" })}, ${fmt(s, { hour: "numeric", minute: "2-digit", hour12: true })} (${tzLabel()})`;
+		$("[data-chosen]").textContent = `${fmt(s, { weekday: "long", day: "numeric", month: "long" })}, ${fmt(s, { hour: "numeric", minute: "2-digit", hour12: true })} · ${tzLabel()}`;
 		pickStep.hidden = true;
 		form.hidden = false;
 		errorEl.hidden = true;
 		$<HTMLInputElement>("#b-name").focus();
 	}
+
+	/** Common email-domain typos -> the domain people meant. */
+	const DOMAIN_FIXES: Record<string, string> = {
+		"gmial.com": "gmail.com", "gmal.com": "gmail.com", "gmai.com": "gmail.com", "gamil.com": "gmail.com",
+		"gnail.com": "gmail.com", "gmail.co": "gmail.com", "gmail.con": "gmail.com", "gmail.cm": "gmail.com",
+		"gmaill.com": "gmail.com", "yaho.com": "yahoo.com", "yahooo.com": "yahoo.com", "yahoo.co": "yahoo.com",
+		"hotmial.com": "hotmail.com", "hotmai.com": "hotmail.com", "hotmail.co": "hotmail.com",
+		"outlok.com": "outlook.com", "outllok.com": "outlook.com", "outlook.co": "outlook.com",
+		"iclod.com": "icloud.com", "icloud.co": "icloud.com",
+	};
+	const emailInput = $<HTMLInputElement>("#b-email");
+	const suggestEl = $("[data-suggest]");
+	const suggestBtn = $<HTMLButtonElement>("[data-suggest-btn]");
+	/** The corrected address if the domain looks like a typo, else null. */
+	function emailFix(value: string): string | null {
+		const at = value.lastIndexOf("@");
+		if (at < 1) return null;
+		const fixed = DOMAIN_FIXES[value.slice(at + 1).toLowerCase()];
+		return fixed ? value.slice(0, at + 1) + fixed : null;
+	}
+	function checkEmail() {
+		const fix = emailFix(emailInput.value.trim());
+		suggestEl.hidden = !fix;
+		if (fix) suggestBtn.textContent = fix;
+	}
+	emailInput.addEventListener("blur", checkEmail);
+	emailInput.addEventListener("input", () => { if (!suggestEl.hidden) checkEmail(); });
+	suggestBtn.addEventListener("click", () => {
+		emailInput.value = suggestBtn.textContent ?? emailInput.value;
+		suggestEl.hidden = true;
+	});
 
 	$("[data-back]").addEventListener("click", () => {
 		form.hidden = true;
@@ -253,6 +287,14 @@ const BOOKING_API =
 			errorEl.hidden = false;
 			return;
 		}
+		// Stop before booking if the email domain looks like a typo, so the invite isn't lost.
+		const fix = emailFix(payload.email);
+		if (fix) {
+			checkEmail();
+			errorEl.textContent = `Please check your email address. Did you mean ${fix}?`;
+			errorEl.hidden = false;
+			return;
+		}
 		submitBtn.disabled = true;
 		submitBtn.textContent = "Booking…";
 		errorEl.hidden = true;
@@ -261,7 +303,7 @@ const BOOKING_API =
 			const res = await fetch(api, { method: "POST", body: JSON.stringify(payload) });
 			const json = await res.json();
 			if (!json.ok) throw new Error(json.error || "Booking failed.");
-			$("[data-done-text]").textContent = `${fmt(chosen, { weekday: "long", day: "numeric", month: "long" })} at ${fmt(chosen, { hour: "numeric", minute: "2-digit", hour12: true })} (${tzLabel()}).`;
+			$("[data-done-text]").textContent = `${fmt(chosen, { weekday: "long", day: "numeric", month: "long" })} at ${fmt(chosen, { hour: "numeric", minute: "2-digit", hour12: true })} · ${tzLabel()}.`;
 			form.hidden = true;
 			doneStep.hidden = false;
 		} catch (err) {
@@ -455,6 +497,11 @@ const BOOKING_API =
 		width: 1px;
 		height: 1px;
 		opacity: 0;
+	}
+	.suggest {
+		margin: 6px 0 0;
+		font-size: 13.5px;
+		color: hsl(var(--theme-text) / 0.75);
 	}
 	.error {
 		margin: 14px 0 0;
