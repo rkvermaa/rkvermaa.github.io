@@ -13,13 +13,11 @@ const {articleDate, description, ogImage, title} = Astro.props;
 const titleSeparator = "|";
 // The home page shares as the name itself, not "Home".
 const isHome = title === "Home";
-const siteTitle = isHome
-	? `${siteConfig.title} ${titleSeparator} AI engineer, founder of Piecewise`
-	: `${title} ${titleSeparator} ${siteConfig.title}`;
+const siteTitle = isHome ? siteConfig.title : `${title} ${titleSeparator} ${siteConfig.title}`;
 const shareTitle = isHome ? siteConfig.title : siteTitle;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 // Renamed from social-card.png so WhatsApp/LinkedIn don't reuse their cached old card.
-const socialImageURL = absoluteUrl(ogImage ? ogImage : "/og-card.png", Astro.site);
+const socialImageURL = absoluteUrl(ogImage ? ogImage : "/share-card.png", Astro.site);
 
 const analytics = siteConfig.analytics;
 const gaId = analytics?.googleAnalyticsId;

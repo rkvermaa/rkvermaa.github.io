@@ -1,6 +1,6 @@
 ---
 title: About
-description: Ravi Kumar Verma — AI engineer and founder of Piecewise, building GenAI systems, multi-agent workflows and large-scale data platforms.
+description: I'm an AI engineer who builds scalable data infrastructure and the intelligent systems that sit on top of it.
 ---
 
 I'm an AI engineer who builds scalable data infrastructure and the intelligent systems that sit on top of it. These days I'm building Piecewise, a platform for running AI agents through structured, cost-controlled workflows, and helping teams ship agents, RAG systems and LLM features as a consultant.
