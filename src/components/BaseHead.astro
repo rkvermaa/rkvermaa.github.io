@@ -13,7 +13,11 @@ const {articleDate, description, ogImage, title} = Astro.props;
 const titleSeparator = "|";
 // The home page shares as the name itself, not "Home".
 const isHome = title === "Home";
-const siteTitle = isHome ? siteConfig.title : `${title} ${titleSeparator} ${siteConfig.title}`;
+// Home: "Name — Job title" so search results say who this is.
+const homeTitle = siteConfig.profile?.jobTitle
+	? `${siteConfig.title} — ${siteConfig.profile.jobTitle}`
+	: siteConfig.title;
+const siteTitle = isHome ? homeTitle : `${title} ${titleSeparator} ${siteConfig.title}`;
 const shareTitle = isHome ? siteConfig.title : siteTitle;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 // Renamed from social-card.png so WhatsApp/LinkedIn don't reuse their cached old card.

@@ -18,7 +18,7 @@ export const now: NowItem[] = [
 	{
 		before: "Building",
 		name: "Piecewise",
-		after: ", a platform for running AI agents through structured, cost-controlled workflows, as founder.",
+		after: ", a side project for running AI agents through structured, cost-controlled workflows.",
 		href: "#piecewise",
 		color: "#1a1a1a",
 	},

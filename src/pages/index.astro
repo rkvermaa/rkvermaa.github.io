@@ -158,13 +158,46 @@ const games = [
 	item={{
 		"@context": "https://schema.org",
 		"@type": "Person",
+		"@id": siteUrl("/#person"),
 		name: profile?.name ?? siteConfig.author,
+		alternateName: ["Ravi K Verma", "Ravi Verma", "Ravi Kumar Verma"],
 		url: siteUrl("/"),
+		...(profile?.avatar ? { image: siteUrl(profile.avatar) } : {}),
 		jobTitle: profile?.jobTitle,
+		description: siteConfig.description,
 		email: profile?.email,
-		sameAs: [profile?.github, profile?.linkedin, profile?.medium].filter(
-			(u): u is string => typeof u === "string" && u.length > 0,
-		),
+		address: {
+			"@type": "PostalAddress",
+			addressLocality: "Kanpur",
+			addressRegion: "Uttar Pradesh",
+			addressCountry: "IN",
+		},
+		...(profile?.alumni ? { alumniOf: { "@type": "CollegeOrUniversity", name: profile.alumni } } : {}),
+		knowsAbout: [
+			"Artificial intelligence",
+			"AI agents",
+			"Large language models",
+			"Retrieval-augmented generation",
+			"Multi-agent systems",
+			"Data engineering",
+		],
+		sameAs: [
+			profile?.linkedin,
+			profile?.github,
+			profile?.medium,
+			"https://www.youtube.com/@bug_hai_bhai",
+			"https://www.instagram.com/bug_hai_bhai/",
+		].filter((u): u is string => typeof u === "string" && u.length > 0),
+	}}
+/>
+
+<Schema
+	item={{
+		"@context": "https://schema.org",
+		"@type": "WebSite",
+		name: siteConfig.title,
+		url: siteUrl("/"),
+		inLanguage: siteConfig.lang,
 	}}
 />
 
