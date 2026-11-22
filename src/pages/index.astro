@@ -179,6 +179,35 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 				)
 			}
 
+			<section aria-labelledby="play-h">
+				<header class="card-head">
+					<h2 id="play-h">
+						<a href={withBase("/play/")} data-astro-prefetch>Play with me ›</a>
+					</h2>
+					<p>Three tiny games for a short break</p>
+				</header>
+				<ul class="card list">
+					<li>
+						<a href={withBase("/play/#ttt-h")}>
+							<span class="row-title">Tic-tac-toe</span>
+							<span class="row-detail">I never lose. Can you get a draw?</span>
+						</a>
+					</li>
+					<li>
+						<a href={withBase("/play/#mem-h")}>
+							<span class="row-title">Memory match</span>
+							<span class="row-detail">Find eight pairs of tech terms</span>
+						</a>
+					</li>
+					<li>
+						<a href={withBase("/play/#rx-h")}>
+							<span class="row-title">Reaction test</span>
+							<span class="row-detail">How fast are your fingers?</span>
+						</a>
+					</li>
+				</ul>
+			</section>
+
 			{
 				shelf.length > 0 && (
 					<section aria-labelledby="books-h">

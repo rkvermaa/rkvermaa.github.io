@@ -1,0 +1,389 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+import { absoluteUrl } from "@/utils/path";
+import { Schema } from "astro-seo-schema";
+
+const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
+---
+
+<Schema
+	item={{
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: [
+			{ "@type": "ListItem", position: 1, name: "Home", item: siteUrl("/") },
+			{ "@type": "ListItem", position: 2, name: "Play", item: siteUrl("/play/") },
+		],
+	}}
+/>
+
+<PageLayout meta={{ title: "Play with me", description: "Three tiny games: tic-tac-toe, memory match and a reaction test." }}>
+	<div class="section-label">Play with me</div>
+	<p class="intro">Three tiny games for a short break. No sign-up, no ads, nothing saved.</p>
+
+	<section class="game" aria-labelledby="ttt-h">
+		<h2 id="ttt-h">Tic-tac-toe</h2>
+		<p class="hint">You're X. I play O, and I don't make mistakes. Try for a draw.</p>
+		<div class="ttt" id="ttt" role="group" aria-label="Tic-tac-toe board">
+			{Array.from({ length: 9 }, (_, i) => (
+				<button type="button" class="cell" data-i={i} aria-label={`Square ${i + 1}, empty`}></button>
+			))}
+		</div>
+		<div class="bar">
+			<p class="status" id="ttt-status" aria-live="polite">Your move.</p>
+			<button type="button" class="reset" id="ttt-reset">New game</button>
+		</div>
+	</section>
+
+	<section class="game" aria-labelledby="mem-h">
+		<h2 id="mem-h">Memory match</h2>
+		<p class="hint">Flip two cards at a time and find all eight pairs of tech terms.</p>
+		<div class="mem" id="mem"></div>
+		<div class="bar">
+			<p class="status" id="mem-status" aria-live="polite">Moves: 0</p>
+			<button type="button" class="reset" id="mem-reset">Shuffle</button>
+		</div>
+	</section>
+
+	<section class="game" aria-labelledby="rx-h">
+		<h2 id="rx-h">Reaction test</h2>
+		<p class="hint">Press start, wait for the box to turn orange, then click it as fast as you can.</p>
+		<button type="button" class="rx" id="rx" data-state="idle">Start</button>
+		<p class="status" id="rx-status" aria-live="polite">Best: none yet</p>
+	</section>
+</PageLayout>
+
+<script>
+	/* ---------- Tic-tac-toe (minimax, the computer never loses) ---------- */
+	type Mark = "X" | "O" | "";
+	const LINES: [number, number, number][] = [
+		[0, 1, 2], [3, 4, 5], [6, 7, 8],
+		[0, 3, 6], [1, 4, 7], [2, 5, 8],
+		[0, 4, 8], [2, 4, 6],
+	];
+	const tttCells = Array.from(document.querySelectorAll<HTMLButtonElement>("#ttt .cell"));
+	const tttStatus = document.getElementById("ttt-status");
+	const tttReset = document.getElementById("ttt-reset");
+	let board: Mark[] = Array<Mark>(9).fill("");
+	let over = false;
+
+	const winner = (b: Mark[]): Mark => {
+		for (const [a, c, d] of LINES) {
+			const m = b[a];
+			if (m && m === b[c] && m === b[d]) return m;
+		}
+		return "";
+	};
+	const full = (b: Mark[]) => b.every((m) => m !== "");
+
+	const minimax = (b: Mark[], turn: "X" | "O"): number => {
+		const w = winner(b);
+		if (w === "O") return 1;
+		if (w === "X") return -1;
+		if (full(b)) return 0;
+		let best = turn === "O" ? -2 : 2;
+		for (let i = 0; i < 9; i++) {
+			if (b[i] !== "") continue;
+			b[i] = turn;
+			const score = minimax(b, turn === "O" ? "X" : "O");
+			b[i] = "";
+			best = turn === "O" ? Math.max(best, score) : Math.min(best, score);
+		}
+		return best;
+	};
+
+	const bestMove = (b: Mark[]): number => {
+		let move = -1;
+		let best = -2;
+		for (let i = 0; i < 9; i++) {
+			if (b[i] !== "") continue;
+			b[i] = "O";
+			const score = minimax(b, "X");
+			b[i] = "";
+			if (score > best) {
+				best = score;
+				move = i;
+			}
+		}
+		return move;
+	};
+
+	const renderTtt = () => {
+		tttCells.forEach((cell, i) => {
+			const m = board[i] ?? "";
+			cell.textContent = m;
+			cell.dataset.mark = m;
+			cell.disabled = over || m !== "";
+			cell.setAttribute("aria-label", `Square ${i + 1}, ${m === "" ? "empty" : m}`);
+		});
+	};
+
+	const finish = () => {
+		const w = winner(board);
+		if (w || full(board)) {
+			over = true;
+			if (tttStatus) tttStatus.textContent = w === "X" ? "You won. That shouldn't happen!" : w === "O" ? "I win this one." : "A draw. Well played.";
+			return true;
+		}
+		return false;
+	};
+
+	tttCells.forEach((cell, i) => {
+		cell.addEventListener("click", () => {
+			if (over || board[i] !== "") return;
+			board[i] = "X";
+			if (!finish()) {
+				const move = bestMove(board);
+				if (move >= 0) board[move] = "O";
+				if (!finish() && tttStatus) tttStatus.textContent = "Your move.";
+			}
+			renderTtt();
+		});
+	});
+	tttReset?.addEventListener("click", () => {
+		board = Array<Mark>(9).fill("");
+		over = false;
+		if (tttStatus) tttStatus.textContent = "Your move.";
+		renderTtt();
+	});
+	renderTtt();
+
+	/* ---------- Memory match ---------- */
+	const TERMS = ["RAG", "LLM", "GPU", "API", "SQL", "JSON", "Agent", "Token"];
+	const memEl = document.getElementById("mem");
+	const memStatus = document.getElementById("mem-status");
+	const memReset = document.getElementById("mem-reset");
+	let deck: string[] = [];
+	let open: number[] = [];
+	let matched = new Set<number>();
+	let moves = 0;
+	let locked = false;
+
+	const shuffle = <T,>(items: T[]): T[] => {
+		const a = [...items];
+		for (let i = a.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			const tmp = a[i] as T;
+			a[i] = a[j] as T;
+			a[j] = tmp;
+		}
+		return a;
+	};
+
+	const renderMem = () => {
+		if (!memEl) return;
+		memEl.querySelectorAll<HTMLButtonElement>("button").forEach((btn, i) => {
+			const shown = open.includes(i) || matched.has(i);
+			btn.textContent = shown ? (deck[i] ?? "") : "";
+			btn.dataset.shown = shown ? "true" : "false";
+			btn.dataset.matched = matched.has(i) ? "true" : "false";
+			btn.disabled = matched.has(i);
+			btn.setAttribute("aria-label", shown ? `Card ${i + 1}, ${deck[i] ?? ""}` : `Card ${i + 1}, face down`);
+		});
+		if (memStatus) {
+			memStatus.textContent = matched.size === deck.length ? `All pairs found in ${moves} moves.` : `Moves: ${moves}`;
+		}
+	};
+
+	const newMem = () => {
+		if (!memEl) return;
+		deck = shuffle([...TERMS, ...TERMS]);
+		open = [];
+		matched = new Set<number>();
+		moves = 0;
+		locked = false;
+		memEl.replaceChildren(
+			...deck.map((_, i) => {
+				const btn = document.createElement("button");
+				btn.type = "button";
+				btn.className = "card-btn";
+				btn.addEventListener("click", () => flip(i));
+				return btn;
+			}),
+		);
+		renderMem();
+	};
+
+	const flip = (i: number) => {
+		if (locked || open.includes(i) || matched.has(i)) return;
+		open.push(i);
+		if (open.length === 2) {
+			moves++;
+			const [a, b] = open as [number, number];
+			if (deck[a] === deck[b]) {
+				matched.add(a);
+				matched.add(b);
+				open = [];
+			} else {
+				locked = true;
+				window.setTimeout(() => {
+					open = [];
+					locked = false;
+					renderMem();
+				}, 800);
+			}
+		}
+		renderMem();
+	};
+
+	memReset?.addEventListener("click", newMem);
+	newMem();
+
+	/* ---------- Reaction test ---------- */
+	const rx = document.getElementById("rx");
+	const rxStatus = document.getElementById("rx-status");
+	let rxTimer = 0;
+	let goAt = 0;
+	let best = Number.POSITIVE_INFINITY;
+
+	const setRx = (state: string, label: string) => {
+		if (!rx) return;
+		rx.dataset.state = state;
+		rx.textContent = label;
+	};
+
+	rx?.addEventListener("click", () => {
+		const state = rx.dataset.state;
+		if (state === "idle" || state === "done" || state === "early") {
+			setRx("wait", "Wait for orange…");
+			rxTimer = window.setTimeout(() => {
+				goAt = performance.now();
+				setRx("go", "Click!");
+			}, 1200 + Math.random() * 2500);
+		} else if (state === "wait") {
+			window.clearTimeout(rxTimer);
+			setRx("early", "Too soon. Click to try again");
+		} else if (state === "go") {
+			const ms = Math.round(performance.now() - goAt);
+			best = Math.min(best, ms);
+			setRx("done", `${ms} ms. Click to go again`);
+			if (rxStatus) rxStatus.textContent = `Best: ${best} ms`;
+		}
+	});
+</script>
+
+<style>
+	.intro {
+		font-size: 17px;
+		line-height: 1.6;
+		color: hsl(var(--theme-text) / 0.78);
+		margin: 0 0 32px;
+	}
+	.game {
+		background: var(--paper);
+		border-radius: 16px;
+		padding: 24px;
+		margin-bottom: 28px;
+	}
+	.game h2 {
+		margin: 0;
+		font-size: 20px;
+		font-weight: 700;
+	}
+	.hint {
+		margin: 4px 0 18px;
+		font-size: 14.5px;
+		color: hsl(var(--theme-text) / 0.65);
+	}
+	.bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		margin-top: 16px;
+		flex-wrap: wrap;
+	}
+	.status {
+		margin: 0;
+		font-size: 14.5px;
+		font-weight: 500;
+	}
+	.reset {
+		font: inherit;
+		font-size: 14px;
+		padding: 9px 14px;
+		border-radius: 10px;
+		border: 1px solid var(--hairline);
+		background: hsl(var(--theme-bg));
+		color: hsl(var(--theme-text));
+		cursor: pointer;
+	}
+	.reset:hover {
+		color: hsl(var(--theme-accent));
+	}
+
+	/* Tic-tac-toe */
+	.ttt {
+		display: grid;
+		grid-template-columns: repeat(3, 84px);
+		gap: 8px;
+	}
+	.cell {
+		width: 84px;
+		height: 84px;
+		border-radius: 14px;
+		border: 1px solid var(--hairline);
+		background: hsl(var(--theme-bg));
+		font: 700 34px var(--font-sans);
+		color: hsl(var(--theme-text));
+		cursor: pointer;
+	}
+	.cell:disabled {
+		cursor: default;
+	}
+	.cell[data-mark="X"] {
+		color: hsl(var(--theme-accent));
+	}
+
+	/* Memory */
+	.mem {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 76px));
+		gap: 8px;
+	}
+	.mem :global(.card-btn) {
+		height: 64px;
+		border-radius: 12px;
+		border: 1px solid var(--hairline);
+		background: #1a1a1a;
+		color: #ffffff;
+		font: 600 14px var(--font-sans);
+		cursor: pointer;
+	}
+	.mem :global(.card-btn[data-shown="true"]) {
+		background: hsl(var(--theme-bg));
+		color: hsl(var(--theme-text));
+	}
+	.mem :global(.card-btn[data-matched="true"]) {
+		background: var(--accent-soft-strong);
+		cursor: default;
+	}
+
+	/* Reaction */
+	.rx {
+		width: 100%;
+		max-width: 420px;
+		height: 140px;
+		border-radius: 16px;
+		border: none;
+		font: 600 18px var(--font-sans);
+		cursor: pointer;
+		background: #1a1a1a;
+		color: #ffffff;
+		margin-bottom: 14px;
+	}
+	.rx[data-state="wait"] {
+		background: #4a4a45;
+	}
+	.rx[data-state="go"] {
+		background: #e4572e;
+	}
+	.rx[data-state="early"] {
+		background: #8c1d18;
+	}
+
+	button:focus-visible {
+		outline: 2px solid hsl(var(--theme-accent));
+		outline-offset: 3px;
+	}
+</style>
