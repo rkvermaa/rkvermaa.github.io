@@ -11,9 +11,15 @@ type Props = SiteMeta;
 const {articleDate, description, ogImage, title} = Astro.props;
 
 const titleSeparator = "|";
-const siteTitle = `${title} ${titleSeparator} ${siteConfig.title}`;
+// The home page shares as the name itself, not "Home".
+const isHome = title === "Home";
+const siteTitle = isHome
+	? `${siteConfig.title} ${titleSeparator} AI engineer, founder of Piecewise`
+	: `${title} ${titleSeparator} ${siteConfig.title}`;
+const shareTitle = isHome ? siteConfig.title : siteTitle;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const socialImageURL = absoluteUrl(ogImage ? ogImage : "/social-card.png", Astro.site);
+// Renamed from social-card.png so WhatsApp/LinkedIn don't reuse their cached old card.
+const socialImageURL = absoluteUrl(ogImage ? ogImage : "/og-card.png", Astro.site);
 
 const analytics = siteConfig.analytics;
 const gaId = analytics?.googleAnalyticsId;
@@ -52,7 +58,7 @@ const goatcounter = analytics?.goatcounterUrl;
 <meta content="#f2f2ef" name="theme-color"/>
 
 <meta content={articleDate ? "article" : "website"} property="og:type"/>
-<meta content={title} property="og:title"/>
+<meta content={shareTitle} property="og:title"/>
 <meta content={description} property="og:description"/>
 <meta content={canonicalURL} property="og:url"/>
 <meta content={siteConfig.title} property="og:site_name"/>
@@ -71,7 +77,7 @@ const goatcounter = analytics?.goatcounterUrl;
 
 <meta content="summary_large_image" property="twitter:card"/>
 <meta content={canonicalURL} property="twitter:url"/>
-<meta content={title} property="twitter:title"/>
+<meta content={shareTitle} property="twitter:title"/>
 <meta content={description} property="twitter:description"/>
 <meta content={socialImageURL} property="twitter:image"/>
 
