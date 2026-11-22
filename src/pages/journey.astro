@@ -1,0 +1,89 @@
+---
+import { journey } from "@/data/journey";
+import PageLayout from "@/layouts/Base.astro";
+import { absoluteUrl } from "@/utils/path";
+import { Schema } from "astro-seo-schema";
+
+const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
+---
+
+<Schema
+	item={{
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: [
+			{ "@type": "ListItem", position: 1, name: "Home", item: siteUrl("/") },
+			{ "@type": "ListItem", position: 2, name: "Journey", item: siteUrl("/journey/") },
+		],
+	}}
+/>
+
+<PageLayout
+	meta={{
+		title: "Journey",
+		description:
+			"From running rural telephone exchanges at BSNL to building AI agents and Piecewise: my journey, year by year.",
+	}}
+>
+	<section aria-labelledby="journey-label">
+		<div class="section-label" id="journey-label">Journey</div>
+		<p class="intro">
+			From running rural telephone exchanges to building AI agents, one year at a time.
+		</p>
+
+		<div class="timeline">
+			{
+				journey.map((entry, idx) => (
+					<div class="post year" id={`y${entry.year}`} style={`--i: ${idx}`}>
+						<div class="post-rail">
+							<span class="post-date">{entry.year}</span>
+							<span class="post-dot" aria-hidden="true" />
+						</div>
+						<div class="post-body">
+							<h2 class="post-title">{entry.title}</h2>
+							<ul class="events">
+								{entry.events.map((event) => (
+									<li>{event}</li>
+								))}
+							</ul>
+						</div>
+					</div>
+				))
+			}
+		</div>
+	</section>
+</PageLayout>
+
+<style>
+	.intro {
+		font-size: 17px;
+		line-height: 1.6;
+		color: hsl(var(--theme-text) / 0.78);
+		margin: 0 0 40px;
+		max-width: 60ch;
+	}
+	.year {
+		scroll-margin-top: 24px;
+	}
+	.events {
+		margin: 6px 0 0;
+		padding-left: 18px;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		font-size: 15.5px;
+		line-height: 1.6;
+		color: hsl(var(--theme-text) / 0.82);
+	}
+	/* Years aren't links, so drop the timeline's clickable affordances. */
+	.timeline :global(.year:hover .post-title) {
+		color: hsl(var(--theme-text));
+	}
+	.timeline :global(.year:active) {
+		transform: none;
+		opacity: 1;
+	}
+	.year:target .post-title {
+		color: hsl(var(--theme-accent));
+	}
+</style>

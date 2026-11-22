@@ -1,78 +1,133 @@
 ---
+import { books } from "@/data/books";
+import { journey } from "@/data/journey";
+import { projects } from "@/data/projects";
+import { writing } from "@/data/writing";
 import { siteConfig } from "@/site-config";
 import { withBase } from "@/utils/path";
 
-const year = new Date().getFullYear();
+const name = siteConfig.profile?.name ?? siteConfig.author;
+
+const links: { title: string; path: string }[] = [
+	{ title: "Home", path: "/" },
+	{ title: "About", path: "/about/" },
+	{ title: "Journey", path: "/journey/" },
+	{ title: "Experience", path: "/experience/" },
+	...(projects.length > 0 ? [{ title: "Projects", path: "/projects/" }] : []),
+	...(writing.length > 0 ? [{ title: "Writing", path: "/writing/" }] : []),
+	...(books.length > 0 ? [{ title: "Books", path: "/books/" }] : []),
+	{ title: "Skills", path: "/skills/" },
+	{ title: "Contact", path: "/contact/" },
+];
+
+/** Oldest first, so the row reads left to right like a timeline. */
+const years = journey.map((entry) => entry.year).sort((a, b) => a - b);
 ---
 
 <footer class="site-footer">
-	<div class="left">
-		<span>&copy; {year} {siteConfig.author}</span>
-		{!siteConfig.hideThemeCredit && (
-			<span class="theme-credit">
-				🚀 Powered by <a href="https://github.com/anjay-goel/astro-sienna" rel="noopener">Astro Sienna</a>
-			</span>
-		)}
-	</div>
-	<div class="right">
-		<a href={withBase("/projects/")}>Projects</a>
-		<span class="sep" aria-hidden="true">·</span>
-		<a href={withBase("/contact/")}>Contact</a>
-	</div>
+	<span class="line" aria-hidden="true"></span>
+	<a class="signature" href={withBase("/")} aria-label={`${name}, home`}>Ravi Verma</a>
+	<p class="made">
+		Made with
+		<svg aria-label="love" role="img" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg>
+		by {name}
+	</p>
+	<p class="bio">
+		{name} is an AI engineer and founder from Uttar Pradesh, India, building Piecewise and helping
+		teams ship AI agents and LLM features.
+	</p>
+	<nav class="links" aria-label="Footer">
+		{links.map((item) => <a href={withBase(item.path)}>{item.title}</a>)}
+	</nav>
+	{
+		years.length > 0 && (
+			<nav class="years" aria-label="Journey by year">
+				{years.map((year) => (
+					<a href={withBase(`/journey/#y${year}`)}>{year}</a>
+				))}
+			</nav>
+		)
+	}
 </footer>
 
 <style>
 	.site-footer {
-		border-top: 1px solid var(--hairline);
-		padding-top: 22px;
+		margin-top: 96px;
 		display: flex;
+		flex-direction: column;
 		align-items: center;
-		justify-content: space-between;
-		flex-wrap: wrap;
-		gap: 16px;
+		text-align: center;
+		gap: 14px;
 		font-family: var(--font-sans);
-		font-size: 12.5px;
 		color: hsl(var(--theme-text) / 0.72);
-		transition: border-color 0.35s ease;
 	}
-	.site-footer .left {
-		display: flex;
-		gap: 18px;
+	.line {
+		width: 1px;
+		height: 64px;
+		background: hsl(var(--theme-text) / 0.6);
+		margin-bottom: 8px;
+	}
+	.signature {
+		font-family: var(--font-signature);
+		font-size: 44px;
+		line-height: 1.2;
+		color: hsl(var(--theme-text));
+		transform: rotate(-6deg);
+		padding: 0 12px;
+	}
+	.made {
+		margin: 0;
+		font-family: var(--font-mono);
+		font-size: 12px;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		display: inline-flex;
 		align-items: center;
+		gap: 6px;
+	}
+	.bio {
+		margin: 4px 0 0;
+		max-width: 46ch;
+		font-size: 14.5px;
+		line-height: 1.6;
+	}
+	.links,
+	.years {
+		display: flex;
 		flex-wrap: wrap;
+		justify-content: center;
+		gap: 6px 18px;
+		font-size: 14.5px;
 	}
-	.site-footer .theme-credit {
-		font-size: 11.5px;
-		color: hsl(var(--theme-text) / 0.55);
+	.links {
+		margin-top: 10px;
 	}
-	.site-footer .theme-credit a {
-		color: inherit;
-		border-bottom: 1px dotted hsl(var(--theme-text) / 0.35);
-	}
-	.site-footer .theme-credit a:hover {
-		color: hsl(var(--theme-accent));
-		border-bottom-color: currentColor;
-	}
-	.site-footer .right {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-	}
-	.site-footer .right .sep {
-		color: var(--faint);
+	.years {
+		margin-top: 6px;
+		font-size: 13.5px;
+		font-variant-numeric: tabular-nums;
 	}
 	.site-footer a {
-		color: hsl(var(--theme-text-muted));
+		color: hsl(var(--theme-text));
 		transition: color 0.2s ease;
 	}
 	.site-footer a:hover {
 		color: hsl(var(--theme-accent));
 	}
+	.site-footer a:focus-visible {
+		outline: 2px solid hsl(var(--theme-accent));
+		outline-offset: 3px;
+		border-radius: 3px;
+	}
 
 	@media (max-width: 420px) {
-		.site-footer {
-			font-size: 11.5px;
-			gap: 12px;
+		.signature {
+			font-size: 36px;
+		}
+		.links,
+		.years {
+			gap: 4px 14px;
+			font-size: 13.5px;
 		}
 	}
 </style>

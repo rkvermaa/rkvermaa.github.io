@@ -12,14 +12,14 @@ export const siteConfig: SiteConfig = {
 		},
 	},
 	description:
-		"Full-Stack AI Engineer working on agentic AI — agent harnesses, multi-agent orchestration, LLM tooling and the data platforms underneath.",
-	intro: `Full-Stack AI Engineer working on agentic AI: agent harnesses, multi-agent orchestration, LLM tooling, RAG and the data platforms underneath.
+		"AI engineer and founder of Piecewise. I help teams ship AI agents, RAG systems and LLM features, and the data platforms underneath.",
+	intro: `AI engineer and founder of Piecewise. I help teams ship AI agents, RAG systems and LLM features, and the data platforms underneath.
 
-Eight years building AI systems that ship — for finance, telecom and energy, from prototype to production.`,
+14+ years in tech, 8+ of them building AI and data systems for finance, telecom and energy.`,
 	lang: "en-US",
 	ogLocale: "en_US",
 	title: "Ravi Kumar Verma",
-	hideThemeCredit: false,
+	hideThemeCredit: true,
 	profile: {
 		name: "Ravi Kumar Verma",
 		tagline: "Full-Stack AI Engineer",
@@ -29,8 +29,8 @@ Eight years building AI systems that ship — for finance, telecom and energy, f
 		github: "https://github.com/rkvermaa",
 		linkedin: "https://www.linkedin.com/in/ravi-kumar-verma-16837734/",
 		medium: "https://medium.com/@rkverma87",
-		jobTitle: "Lead Data Scientist",
-		employer: "Passageway",
+		jobTitle: "Founder",
+		employer: "Piecewise",
 		alumni: "IIT Roorkee",
 		avatar: "/avatar.jpg",
 		resume: "/cv.pdf",

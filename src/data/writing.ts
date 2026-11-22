@@ -14,4 +14,11 @@ export interface WritingLink {
  * Articles published elsewhere. While this array is empty the "Writing" nav
  * item and page hide themselves — same behaviour as an empty `projects` list.
  */
-export const writing: WritingLink[] = [];
+export const writing: WritingLink[] = [
+	{
+		title: "The Complete RAG Playbook",
+		href: "https://medium.com/@rkverma87",
+		source: "Medium",
+		description: "A series on building retrieval-augmented generation that works in production. Part 1 ran in Towards AI.",
+	},
+];
