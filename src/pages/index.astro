@@ -243,7 +243,16 @@ const games = [
 					recentRoles.map((role) => (
 						<li>
 							<span class="item-title">{role.role}<span class="item-sub"> · {role.company}</span></span>
-							<span class="item-detail">{roleDates(role.start, role.end)}</span>
+							<span class="item-detail">
+								{roleDates(role.start, role.end)}
+								{role.remote && (
+									<span class="wfh">
+										{" · "}
+										<svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" /></svg>
+										Work from home
+									</span>
+								)}
+							</span>
 						</li>
 					))
 				}
@@ -687,6 +696,11 @@ const games = [
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+	.wfh svg {
+		vertical-align: -1px;
+		margin-right: 2px;
+		color: #0f7b5f;
 	}
 	.dots a:hover .item-title {
 		color: hsl(var(--theme-accent));
