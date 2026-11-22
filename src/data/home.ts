@@ -28,7 +28,7 @@ export const now: NowItem[] = [
 		after:
 			": agentic workflows, multi-agent systems, agent harnesses, skills, MCP integrations and RAG.",
 		color: "#b83f1a",
-		cta: { label: "Book a call", href: "mailto:rkverma87@gmail.com" },
+		cta: { label: "Book a call", href: "/book/" },
 	},
 	{
 		before: "Creating a full AI-ML course on",

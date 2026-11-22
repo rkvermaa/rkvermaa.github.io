@@ -1,0 +1,103 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+import { absoluteUrl } from "@/utils/path";
+import { Schema } from "astro-seo-schema";
+
+const siteUrl = (path: string) => absoluteUrl(path, Astro.site);
+
+/**
+ * Google Calendar appointment schedule ("20-minute call with Ravi Kumar Verma").
+ * Bookings land in Ravi's Google Calendar with a Meet link; busy times are hidden automatically.
+ * Edit hours/duration in Google Calendar → Booking pages, not here.
+ */
+const BOOKING_URL =
+	"https://calendar.google.com/calendar/appointments/schedules/AcZssZ3C-aJanqpx11Fbe4ztmatnjUg66IMqHllfYU9SMSX_N9ezn3B2VnAS99UraDTzsnMCs7cXt8g9";
+---
+
+<Schema
+	item={{
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: [
+			{ "@type": "ListItem", position: 1, name: "Home", item: siteUrl("/") },
+			{ "@type": "ListItem", position: 2, name: "Book a call", item: siteUrl("/book/") },
+		],
+	}}
+/>
+
+<PageLayout
+	meta={{
+		title: "Book a call",
+		description: "Book a free 20-minute call with Ravi Kumar Verma about AI agents, RAG or automation.",
+	}}
+	wide
+>
+	<section class="book" aria-labelledby="book-h">
+		<h1 class="label" id="book-h">/book-a-call</h1>
+		<p class="intro">
+			A free 20-minute call about your AI agent, RAG or automation project. Pick a time that suits you;
+			it's shown in your own time zone, and you'll get a Google Meet link by email.
+		</p>
+
+		<div class="frame">
+			<iframe
+				src={`${BOOKING_URL}?gv=true`}
+				title="Book a 20-minute call with Ravi Kumar Verma"
+				loading="lazy"></iframe>
+		</div>
+
+		<p class="fallback">
+			Calendar not loading? <a href={BOOKING_URL} rel="noreferrer" target="_blank">Open the booking page ↗</a>
+		</p>
+	</section>
+</PageLayout>
+
+<style>
+	.book {
+		margin: 8px 0 64px;
+	}
+	.label {
+		margin: 0 0 12px;
+		font-family: var(--font-mono);
+		font-size: 12px;
+		font-weight: 400;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: hsl(var(--theme-text) / 0.62);
+	}
+	.intro {
+		margin: 0 0 24px;
+		max-width: 62ch;
+		font-size: 16px;
+		line-height: 1.6;
+		color: hsl(var(--theme-text) / 0.85);
+	}
+	/* Same soft paper card as the home page cards. */
+	.frame {
+		background: #ffffff;
+		border-radius: 16px;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+		overflow: hidden;
+	}
+	.frame iframe {
+		display: block;
+		width: 100%;
+		height: 760px;
+		border: 0;
+	}
+	.fallback {
+		margin: 14px 0 0;
+		font-size: 13.5px;
+		color: hsl(var(--theme-text) / 0.6);
+	}
+	.fallback a {
+		color: hsl(var(--theme-accent));
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+	@media (max-width: 600px) {
+		.frame iframe {
+			height: 900px;
+		}
+	}
+</style>
